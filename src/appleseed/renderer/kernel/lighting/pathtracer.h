@@ -687,6 +687,13 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
 
         next_ray.m_max_roughness = m_clamp_roughness ? sample.m_max_roughness : 0.0f;
 
+        if (sample.m_mode == ScatteringMode::Glossy && !vertex.m_albedo_saved)
+        {
+            vertex.m_glass_transparency = sample.m_aov_components.m_alpha_transparency;
+            vertex.m_albedo_saved = true;
+            m_path_visitor.on_first_diffuse_bounce(vertex);
+        }
+
         if (sample.m_mode == ScatteringMode::Diffuse && !vertex.m_albedo_saved)
         {
             vertex.m_albedo = sample.m_aov_components.m_albedo;

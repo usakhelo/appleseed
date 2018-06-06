@@ -74,10 +74,10 @@ namespace
             const AOVComponents&        aov_components,
             ShadingResult&              shading_result) override
         {
-            shading_result.m_aovs[m_index].rgb() =
-                aov_components.m_albedo.to_rgb(g_std_lighting_conditions);
+            shading_result.m_aovs[m_index].set(aov_components.m_alpha_transparency);
+                //aov_components.m_albedo.to_rgb(g_std_lighting_conditions);
 
-            shading_result.m_aovs[m_index].a = shading_result.m_main.a;
+            shading_result.m_aovs[m_index].a = shading_result.m_main.a; //aov_components.m_alpha_transparency; // 
         }
 
       private:

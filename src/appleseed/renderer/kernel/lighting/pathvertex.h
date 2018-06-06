@@ -93,6 +93,7 @@ class PathVertex
     ScatteringMode::Mode        m_aov_mode;
     Spectrum                    m_albedo;
     bool                        m_albedo_saved;
+    float                       m_glass_transparency;
 
     // Constructor.
     explicit PathVertex(SamplingContext& sampling_context);

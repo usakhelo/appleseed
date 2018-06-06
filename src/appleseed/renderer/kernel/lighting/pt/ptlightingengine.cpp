@@ -350,6 +350,7 @@ namespace
             void on_first_diffuse_bounce(const PathVertex& vertex)
             {
                 m_aov_components.m_albedo = vertex.m_albedo;
+                m_aov_components.m_alpha_transparency = vertex.m_glass_transparency;
             }
 
             bool accept_scattering(
