@@ -284,7 +284,6 @@ namespace
 
             Vector3f wi;
             bool is_refraction;
-            float in_multiplier;
 
             switch (m_mdf_type)
             {
@@ -307,8 +306,7 @@ namespace
                         wo,
                         wi,
                         sample.m_value.m_glossy,
-                        sample.m_probability,
-                        in_multiplier);
+                        sample.m_probability);
 
                     add_energy_compensation_term(
                         mdf,
@@ -339,8 +337,7 @@ namespace
                         wo,
                         wi,
                         sample.m_value.m_glossy,
-                        sample.m_probability,
-                        in_multiplier);
+                        sample.m_probability);
 
                     add_energy_compensation_term(
                         mdf,
@@ -371,8 +368,7 @@ namespace
                         wo,
                         wi,
                         sample.m_value.m_glossy,
-                        sample.m_probability,
-                        in_multiplier);
+                        sample.m_probability);
                 }
                 break;
 
@@ -383,11 +379,11 @@ namespace
                 return;
 
             sample.m_value.m_beauty = sample.m_value.m_glossy;
-            sample.m_aov_components.m_alpha_transparency = in_multiplier; // values->m_precomputed.m_refraction_weight;
 
             sample.m_mode = ScatteringMode::Glossy;
 
             sample.m_incoming = Dual3f(basis.transform_to_parent(wi));
+            sample.m_aov_components.m_albedo = values->m_precomputed.m_refraction_color;
 
             if (is_refraction)
                 sample.compute_transmitted_differentials(1.0f / eta);
@@ -411,8 +407,7 @@ namespace
             const Vector3f&             wo,
             Vector3f&                   wi,
             SpectrumType&               value,
-            float&                      probability,
-            float&                      in_multiplier)
+            float&                      probability)
         {
             // Compute the microfacet normal by sampling the MDF.
             Vector3f m = mdf.sample(wo, Vector2f(s[0], s[1]), alpha_x, alpha_y, gamma);
@@ -492,8 +487,7 @@ namespace
                     alpha_y,
                     gamma,
                     1.0f - F,
-                    value,
-                    in_multiplier);
+                    value);
 
                 // Recompute the half vector to have a better
                 // match with the result of the pdf method.
@@ -675,7 +669,7 @@ namespace
                 const Vector3f m = half_refraction_vector(wo, wi, eta);
                 const float cos_wom = dot(wo, m);
                 const float F = fresnel_reflectance(cos_wom, 1.0f / eta);
-                float in_multiplier;
+
                 evaluate_refraction(
                     mdf,
                     eta,
@@ -688,8 +682,7 @@ namespace
                     alpha_y,
                     gamma,
                     1.0f - F,
-                    value.m_glossy,
-                    in_multiplier);
+                    value.m_glossy);
                 value.m_beauty = value.m_glossy;
 
                 const float r_probability = choose_reflection_probability(
@@ -1023,8 +1016,7 @@ namespace
             const float                 alpha_y,
             const float                 gamma,
             const float                 T,
-            SpectrumType&               value,
-            float&                      in_multiplier)
+            SpectrumType&               value)
         {
             if (wo.y == 0.0f || wi.y == 0.0f)
             {
@@ -1052,7 +1044,6 @@ namespace
             if (!adjoint)
                 multiplier *= square(eta);
 
-            in_multiplier = multiplier;
             value = refraction_color;
             value *= multiplier;
         }
@@ -1334,7 +1325,6 @@ namespace
                 Vector3f wi;
                 float value = 0.0f;
                 float probability = 0.0f;
-                float multi;
 
                 GlassBSDFImpl::do_sample(
                     mdf,
@@ -1352,8 +1342,7 @@ namespace
                     wo,
                     wi,
                     value,
-                    probability,
-                    multi);
+                    probability);
 
                 if (probability < 1.0e-6f)
                     continue;

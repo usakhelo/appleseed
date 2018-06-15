@@ -278,10 +278,16 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
                     ray.m_dir - ray.m_ry.m_dir)
                 : foundation::Dual3d(-ray.m_dir);
 
+        vertex.m_glass_transparency = 1.0f;
         // Terminate the path if the ray didn't hit anything.
         if (!vertex.m_shading_point->hit_surface())
         {
             m_path_visitor.on_miss(vertex);
+            if (vertex.m_prev_mode == ScatteringMode::Glossy)
+            {
+                vertex.m_glass_transparency = 0.0f;
+                m_path_visitor.on_first_diffuse_bounce(vertex);
+            }
             break;
         }
 
@@ -689,17 +695,17 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
 
         if (sample.m_mode == ScatteringMode::Glossy && !vertex.m_albedo_saved)
         {
-            vertex.m_glass_transparency = sample.m_aov_components.m_alpha_transparency;
             vertex.m_albedo_saved = true;
+            vertex.m_albedo = sample.m_aov_components.m_albedo; // *vertex.m_glass_transparency;
             m_path_visitor.on_first_diffuse_bounce(vertex);
         }
 
-        if (sample.m_mode == ScatteringMode::Diffuse && !vertex.m_albedo_saved)
-        {
-            vertex.m_albedo = sample.m_aov_components.m_albedo;
-            vertex.m_albedo_saved = true;
-            m_path_visitor.on_first_diffuse_bounce(vertex);
-        }
+        //if (sample.m_mode == ScatteringMode::Diffuse && !vertex.m_albedo_saved)
+        //{
+        //    vertex.m_albedo = sample.m_aov_components.m_albedo;
+        //    vertex.m_albedo_saved = true;
+        //    m_path_visitor.on_first_diffuse_bounce(vertex);
+        //}
     }
     else
     {
