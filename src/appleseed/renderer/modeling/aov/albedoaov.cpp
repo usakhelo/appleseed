@@ -80,8 +80,11 @@ namespace
 
             float alb_float = luminance(aov_components.m_albedo.to_rgb(g_std_lighting_conditions));
             float alb = fit(alb_float, 0.0f, alb_float, 0.0f, 1.0f);
-            shading_result.m_aovs[m_index].rgb() = (alpha * alb_float).to_rgb(g_std_lighting_conditions);// (aov_components.m_albedo + alpha).to_rgb(g_std_lighting_conditions);
+            //shading_result.m_aovs[m_index].rgb() = (alpha * alb_float).to_rgb(g_std_lighting_conditions);// (aov_components.m_albedo + alpha).to_rgb(g_std_lighting_conditions);
             //shading_result.m_aovs[m_index].rgb() = (alpha * aov_components.m_albedo).to_rgb(g_std_lighting_conditions);// (aov_components.m_albedo + alpha).to_rgb(g_std_lighting_conditions);
+            
+            //shading_result.m_aovs[m_index].rgb() = aov_components.m_albedo.to_rgb(g_std_lighting_conditions);
+            shading_result.m_aovs[m_index].set(aov_components.m_alpha_transparency);
 
             shading_result.m_aovs[m_index].a = shading_result.m_main.a; //aov_components.m_alpha_transparency; // 
         }
