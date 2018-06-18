@@ -278,14 +278,13 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
                     ray.m_dir - ray.m_ry.m_dir)
                 : foundation::Dual3d(-ray.m_dir);
 
-        vertex.m_glass_transparency = 1.0f;
         // Terminate the path if the ray didn't hit anything.
         if (!vertex.m_shading_point->hit_surface())
         {
             m_path_visitor.on_miss(vertex);
-            if (vertex.m_prev_mode == ScatteringMode::Glossy)
+            if (vertex.m_prev_mode == ScatteringMode::Glossy && vertex.m_albedo_saved)
             {
-                vertex.m_glass_transparency = 0.0f;
+                vertex.m_glass_transparency = 0.0f; //take this amount from vertex
                 m_path_visitor.on_first_diffuse_bounce(vertex);
             }
             break;
@@ -693,10 +692,13 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
 
         next_ray.m_max_roughness = m_clamp_roughness ? sample.m_max_roughness : 0.0f;
 
-        if (sample.m_mode == ScatteringMode::Glossy && !vertex.m_albedo_saved)
+        if (sample.m_mode == ScatteringMode::Glossy &&
+            vertex.m_path_length == 1 &&
+            !vertex.m_albedo_saved &&
+            sample.m_is_transparent_sample)
         {
             vertex.m_albedo_saved = true;
-            vertex.m_albedo = sample.m_aov_components.m_albedo; // *vertex.m_glass_transparency;
+            vertex.m_glass_transparency = 1.0f;
             m_path_visitor.on_first_diffuse_bounce(vertex);
         }
 

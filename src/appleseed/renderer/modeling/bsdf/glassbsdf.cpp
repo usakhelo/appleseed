@@ -383,7 +383,9 @@ namespace
             sample.m_mode = ScatteringMode::Glossy;
 
             sample.m_incoming = Dual3f(basis.transform_to_parent(wi));
+
             sample.m_aov_components.m_albedo = values->m_precomputed.m_refraction_color;
+            sample.m_is_transparent_sample = is_refraction;
 
             if (is_refraction)
                 sample.compute_transmitted_differentials(1.0f / eta);
