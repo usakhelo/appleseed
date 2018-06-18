@@ -282,10 +282,14 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
         if (!vertex.m_shading_point->hit_surface())
         {
             m_path_visitor.on_miss(vertex);
-            if (vertex.m_prev_mode == ScatteringMode::Glossy && vertex.m_albedo_saved)
+            if (vertex.m_prev_mode == ScatteringMode::Glossy &&
+                vertex.m_albedo_saved)
             {
-                vertex.m_glass_transparency = 0.0f; //take this amount from vertex
-                m_path_visitor.on_first_diffuse_bounce(vertex);
+                if (vertex.m_glass_sample)
+                {
+                    vertex.m_glass_transparency = 0.0f; //take this amount from vertex
+                    m_path_visitor.on_first_diffuse_bounce(vertex);
+                }
             }
             break;
         }
@@ -692,14 +696,17 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
 
         next_ray.m_max_roughness = m_clamp_roughness ? sample.m_max_roughness : 0.0f;
 
-        if (sample.m_mode == ScatteringMode::Glossy &&
-            vertex.m_path_length == 1 &&
-            !vertex.m_albedo_saved &&
-            sample.m_is_transparent_sample)
+        vertex.m_glass_sample = sample.m_is_transparent_sample;
+        if (/*sample.m_mode == ScatteringMode::Glossy &&*/
+            //sample.m_is_transparent_sample &&
+            !vertex.m_albedo_saved)
         {
-            vertex.m_albedo_saved = true;
-            vertex.m_glass_transparency = 1.0f;
-            m_path_visitor.on_first_diffuse_bounce(vertex);
+            if (vertex.m_path_length == 1)
+            {
+                vertex.m_albedo_saved = true;
+                vertex.m_glass_transparency = 1.0f;
+                m_path_visitor.on_first_diffuse_bounce(vertex);
+            }
         }
 
         //if (sample.m_mode == ScatteringMode::Diffuse && !vertex.m_albedo_saved)

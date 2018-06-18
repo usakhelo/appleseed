@@ -94,6 +94,7 @@ class PathVertex
     Spectrum                    m_albedo;
     bool                        m_albedo_saved;
     float                       m_glass_transparency;
+    bool                        m_glass_sample;
 
     // Constructor.
     explicit PathVertex(SamplingContext& sampling_context);
@@ -128,6 +129,7 @@ class PathVertex
 inline PathVertex::PathVertex(SamplingContext& sampling_context)
   : m_sampling_context(sampling_context)
   , m_albedo_saved(false)
+  , m_glass_sample(false)
 {
 }
 
