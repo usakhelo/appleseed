@@ -30,6 +30,7 @@
 #include "aovaccumulator.h"
 
 // appleseed.renderer headers.
+#include "renderer/kernel/aov/aovcomponents.h"
 #include "renderer/kernel/shading/shadingcomponents.h"
 #include "renderer/kernel/shading/shadingpoint.h"
 #include "renderer/kernel/shading/shadingresult.h"
@@ -129,6 +130,8 @@ namespace
         {
             shading_result.m_main.rgb() =
                 shading_components.m_beauty.to_rgb(g_std_lighting_conditions);
+
+            shading_result.m_matte_alpha = aov_components.m_matte_alpha;
         }
     };
 }

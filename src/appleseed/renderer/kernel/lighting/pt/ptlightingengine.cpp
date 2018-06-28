@@ -717,7 +717,10 @@ namespace
                 if (vertex.m_path_length == 1 && strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_inst") == 0)
                 {
                     if (vertex_radiance.m_beauty == Spectrum(0.0f))
+                    {
+                        m_aov_components.m_matte_alpha = 1.0f;
                         m_path_radiance.m_beauty *= 0.0f;
+                    }
                 }
                 else
                 {
