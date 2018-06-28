@@ -713,11 +713,20 @@ namespace
                 if (m_params.m_has_max_ray_intensity && vertex.m_path_length > 1)
                     clamp_contribution(vertex_radiance);
 
-                // Update path radiance.
-                m_path_radiance.add(
-                    vertex.m_path_length,
-                    vertex.m_aov_mode,
-                    vertex_radiance);
+                // If it's matte object then darken the radiance to show the shadow
+                if (vertex.m_path_length == 1 && strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_inst") == 0)
+                {
+                    if (vertex_radiance.m_beauty == Spectrum(0.0f))
+                        m_path_radiance.m_beauty *= 0.0f;
+                }
+                else
+                {
+                    // Update path radiance.
+                    m_path_radiance.add(
+                        vertex.m_path_length,
+                        vertex.m_aov_mode,
+                        vertex_radiance);
+                }
             }
 
           private:

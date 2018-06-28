@@ -281,8 +281,19 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
         // Terminate the path if the ray didn't hit anything.
         if (!vertex.m_shading_point->hit_surface())
         {
+            // Don't sample the background if it's second bounce from the matte surface (basically don't reflect background).
+            if (vertex.m_path_length == 2 && vertex.m_parent_shading_point != nullptr && strcmp(vertex.m_parent_shading_point->get_object_instance().get_name(), "Box001_inst") == 0)
+                break;
+
             m_path_visitor.on_miss(vertex);
             break;
+        }
+
+        // Shade background when hit matte object only if it is first hit. That way matte object is shown normally in reflection/refraction.
+        if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_inst") == 0)
+        {
+            if (vertex.m_path_length == 1)
+                m_path_visitor.on_miss(vertex);
         }
 
         // Retrieve the material at the shading point.
@@ -705,6 +716,13 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
         // However, we need to check if the corresponding mode is still enabled.
         if ((sample.m_mode & vertex.m_scattering_modes) == 0)
             sample.m_mode = ScatteringMode::None;
+    }
+
+    // Stop scattering if it's matte object and it's not first glossy ray (to show reflection on the matte object).
+    if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_inst") == 0)
+    {
+        if (sample.m_mode != ScatteringMode::Glossy && vertex.m_path_length == 1)
+            return false;
     }
 
     // Terminate the path if it gets absorbed.
