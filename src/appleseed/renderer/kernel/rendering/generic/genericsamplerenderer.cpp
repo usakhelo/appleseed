@@ -251,6 +251,12 @@ namespace
                     shading_result.composite_over(local_result);
                 }
 
+                if (shading_point_ptr->hit_surface() && strcmp(shading_point_ptr->get_object_instance().get_name(), "Box001_inst") == 0)
+                {
+                    shading_result.m_main.a = 0.0f;
+                    break;
+                }
+
                 // Stop once we hit the environment.
                 if (!shading_point_ptr->hit_surface())
                     break;
