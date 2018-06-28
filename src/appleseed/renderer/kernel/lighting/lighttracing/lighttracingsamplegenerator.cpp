@@ -306,6 +306,10 @@ namespace
             {
             }
 
+            void save_matte_alpha(const Spectrum& value)
+            {
+            }
+
             size_t get_sample_count() const
             {
                 return m_sample_count;

@@ -46,6 +46,7 @@
 #include "renderer/kernel/shading/shadingcontext.h"
 #include "renderer/kernel/shading/shadingpoint.h"
 #include "renderer/modeling/bsdf/bsdf.h"
+#include "renderer/modeling/color/colorspace.h"
 #include "renderer/modeling/edf/edf.h"
 #include "renderer/modeling/environment/environment.h"
 #include "renderer/modeling/environmentedf/environmentedf.h"
@@ -350,6 +351,11 @@ namespace
             void on_first_diffuse_bounce(const PathVertex& vertex)
             {
                 m_aov_components.m_albedo = vertex.m_albedo;
+            }
+
+            void save_matte_alpha(const Spectrum& value)
+            {
+                m_aov_components.m_matte_alpha = luminance(value.to_rgb(g_std_lighting_conditions));
             }
 
             bool accept_scattering(
