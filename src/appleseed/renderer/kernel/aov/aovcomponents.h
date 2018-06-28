@@ -38,7 +38,8 @@ namespace renderer
 class AOVComponents
 {
   public:
-    Spectrum m_albedo;
+    Spectrum    m_albedo;
+    float       m_matte_alpha;
 
     // Constructor. Clears all components to 0.
     AOVComponents();

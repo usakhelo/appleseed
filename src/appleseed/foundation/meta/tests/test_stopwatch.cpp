@@ -38,7 +38,11 @@ TEST_SUITE(Foundation_Utility_Stopwatch)
     class TestingHandTimer
     {
         public:
-            int time = 0;
+            TestingHandTimer()
+              : time(0)
+            {}
+
+            int time;
 
             int frequency() const { return 1; }
             int read() const { return time; }
