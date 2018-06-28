@@ -253,7 +253,7 @@ namespace
 
                 if (shading_point_ptr->hit_surface() && strcmp(shading_point_ptr->get_object_instance().get_name(), "Box001_inst") == 0)
                 {
-                    shading_result.m_main.a = 0.0f;
+                    shading_result.m_main.a = shading_result.m_matte_alpha;
                     break;
                 }
 

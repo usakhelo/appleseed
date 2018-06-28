@@ -59,6 +59,7 @@ class ShadingResult
     foundation::Color4f m_main;
     foundation::Color4f m_aovs[MaxAOVCount];
     size_t              m_aov_count;
+    float               m_matte_alpha;
 
     // Constructor.
     // AOVs are cleared to transparent black but the main output is left uninitialized.
@@ -87,6 +88,7 @@ class ShadingResult
 
 inline ShadingResult::ShadingResult(const size_t aov_count)
   : m_aov_count(aov_count)
+  , m_matte_alpha(0.0f)
 {
     assert(aov_count <= MaxAOVCount);
 
