@@ -123,6 +123,10 @@ namespace
         {
         }
 
+        void save_matte_alpha(const Spectrum& value)
+        {
+        }
+
         bool accept_scattering(
             const ScatteringMode::Mode  prev_mode,
             const ScatteringMode::Mode  next_mode) const

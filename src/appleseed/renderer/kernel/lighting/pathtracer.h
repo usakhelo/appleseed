@@ -718,13 +718,6 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
             sample.m_mode = ScatteringMode::None;
     }
 
-    // Stop scattering if it's matte object and it's not first glossy ray (to show reflection on the matte object).
-    if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_inst") == 0)
-    {
-        if (sample.m_mode != ScatteringMode::Glossy && vertex.m_path_length == 1)
-            return false;
-    }
-
     // Terminate the path if it gets absorbed.
     if (sample.m_mode == ScatteringMode::None)
         return false;
@@ -745,6 +738,15 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
     if (sample.m_probability != BSDF::DiracDelta)
         sample.m_value /= sample.m_probability;
     vertex.m_throughput *= sample.m_value.m_beauty;
+
+    // Stop scattering if it's matte object and it's not first glossy ray (to show reflection on the matte object).
+    if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_inst") == 0)
+    {
+        if (sample.m_mode != ScatteringMode::Glossy && vertex.m_path_length == 1)
+            return false;
+
+        m_path_visitor.save_matte_alpha(sample.m_value.m_glossy);
+    }
 
     // Update bounce counters.
     ++vertex.m_path_length;
