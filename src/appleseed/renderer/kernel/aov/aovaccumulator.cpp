@@ -131,7 +131,7 @@ namespace
             shading_result.m_main.rgb() =
                 shading_components.m_beauty.to_rgb(g_std_lighting_conditions);
 
-            shading_result.m_matte_alpha = aov_components.m_matte_alpha;
+            shading_result.m_matte_alpha = saturate(aov_components.m_matte_shadow_alpha + aov_components.m_matte_reflection_alpha);
         }
     };
 }

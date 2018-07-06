@@ -283,7 +283,10 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
         {
             // Don't sample the background if it's second bounce from the matte surface (basically don't reflect background).
             if (vertex.m_path_length == 2 && vertex.m_parent_shading_point != nullptr && strcmp(vertex.m_parent_shading_point->get_object_instance().get_name(), "Box001_inst") == 0)
+            {
+                m_path_visitor.save_matte_alpha(Spectrum(0.0f));
                 break;
+            }
 
             m_path_visitor.on_miss(vertex);
             break;
@@ -740,7 +743,8 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
         if (sample.m_mode != ScatteringMode::Glossy && vertex.m_path_length == 1)
             return false;
 
-        m_path_visitor.save_matte_alpha(sample.m_value.m_glossy);
+        if (sample.m_mode == ScatteringMode::Glossy)
+            m_path_visitor.save_matte_alpha(sample.m_value.m_glossy);
     }
 
     // Update bounce counters.

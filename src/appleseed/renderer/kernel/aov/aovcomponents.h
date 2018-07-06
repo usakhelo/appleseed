@@ -39,7 +39,8 @@ class AOVComponents
 {
   public:
     Spectrum    m_albedo;
-    float       m_matte_alpha;
+    float       m_matte_shadow_alpha;
+    float       m_matte_reflection_alpha;
 
     // Constructor. Clears all components to 0.
     AOVComponents();
