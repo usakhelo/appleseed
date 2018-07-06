@@ -355,7 +355,7 @@ namespace
 
             void save_matte_alpha(const Spectrum& value)
             {
-                m_aov_components.m_matte_alpha = luminance(value.to_rgb(g_std_lighting_conditions));
+                m_aov_components.m_matte_reflection_alpha = luminance(value.to_rgb(g_std_lighting_conditions));
             }
 
             bool accept_scattering(
@@ -724,7 +724,7 @@ namespace
                 {
                     if (vertex_radiance.m_beauty == Spectrum(0.0f))
                     {
-                        m_aov_components.m_matte_alpha = 1.0f;
+                        m_aov_components.m_matte_shadow_alpha = 1.0f;
                         m_path_radiance.m_beauty *= 0.0f;
                     }
                 }
