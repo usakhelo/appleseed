@@ -682,6 +682,7 @@ namespace
                 }
 
                 // Direct lighting contribution.
+                bool is_shadow_ray = false;
                 if (m_params.m_enable_dl || vertex.m_path_length > 1)
                 {
                     if (vertex.m_bsdf)
@@ -693,7 +694,8 @@ namespace
                             vertex.m_bsdf_data,
                             vertex.m_scattering_modes,
                             vertex_radiance,
-                            m_light_path_stream);
+                            m_light_path_stream,
+                            is_shadow_ray);
                     }
                 }
 
@@ -722,7 +724,7 @@ namespace
                 // If it's matte object then darken the radiance to show the shadow
                 if (vertex.m_path_length == 1 && strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_inst") == 0)
                 {
-                    if (vertex_radiance.m_beauty == Spectrum(0.0f))
+                    if (is_shadow_ray)
                     {
                         m_aov_components.m_matte_shadow_alpha = 1.0f;
                         m_path_radiance.m_beauty *= 0.0f;
@@ -771,7 +773,8 @@ namespace
                 const void*                 bsdf_data,
                 const int                   scattering_modes,
                 DirectShadingComponents&    vertex_radiance,
-                LightPathStream*            light_path_stream)
+                LightPathStream*            light_path_stream,
+                bool&                       is_shadow_ray)
             {
                 DirectShadingComponents dl_radiance;
 
@@ -805,7 +808,8 @@ namespace
                     MISPower2,
                     outgoing,
                     dl_radiance,
-                    light_path_stream);
+                    light_path_stream,
+                    is_shadow_ray);
 
                 // Divide by the sample count when this number is less than 1.
                 if (m_params.m_rcp_dl_light_sample_count > 0.0f)
