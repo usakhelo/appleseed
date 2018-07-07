@@ -105,7 +105,8 @@ class DirectLightingIntegrator
         const foundation::Dual3d&       outgoing,                   // world space outgoing direction, unit-length
         DirectShadingComponents&        radiance,
         LightPathStream*                light_path_stream,
-        bool&                           is_shadow_ray) const;
+        bool&                           is_shadow,
+        float&                          shadow_alpha) const;
 
   private:
     friend class VolumeLightingIntegrator;
