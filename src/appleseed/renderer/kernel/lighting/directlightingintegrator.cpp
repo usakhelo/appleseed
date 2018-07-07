@@ -127,9 +127,12 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
     const Dual3d&               outgoing,
     DirectShadingComponents&    radiance,
     LightPathStream*            light_path_stream,
-    bool&                       is_shadow_ray) const
+    bool&                       is_shadow,
+    float&                      shadow_alpha) const
 {
     radiance.set(0.0f);
+    bool non_physical_shadow = false;
+    is_shadow = false;
 
     // No light source in the scene.
     if (!m_light_sampler.has_lights())
@@ -156,7 +159,8 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
                 light_path_stream);
         }
 
-        is_shadow_ray = radiance.m_beauty == Spectrum(0.0f);
+        non_physical_shadow = radiance.m_beauty == Spectrum(0.0f);
+        shadow_alpha = non_physical_shadow ? 1.0f : 0.0f;
     }
 
     // Add contributions from the light set.
@@ -201,9 +205,17 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
         if (m_light_sample_count > 1)
             lightset_radiance /= static_cast<float>(m_light_sample_count);
 
-        is_shadow_ray = is_shadow_ray || (lightset_radiance.m_beauty == Spectrum(0.0f));
-
         radiance += lightset_radiance;
+
+        bool lightset_shadow = lightset_radiance.m_beauty == Spectrum(0.0f);
+
+        if (non_physical_shadow)
+            shadow_alpha = shadow_alpha - saturate(lightset_radiance.m_beauty[0]);
+
+        if (lightset_shadow)
+            shadow_alpha = 1.0f;
+
+        is_shadow = non_physical_shadow || lightset_shadow;
     }
 }
 
@@ -220,14 +232,16 @@ void DirectLightingIntegrator::compute_outgoing_radiance_combined_sampling_low_v
         radiance);
 
     DirectShadingComponents radiance_light_sampling;
-    bool is_shadow_ray;
+    float shadow_alpha;
+    bool is_shadow;
     compute_outgoing_radiance_light_sampling_low_variance(
         sampling_context,
         MISPower2,
         outgoing,
         radiance_light_sampling,
         light_path_stream,
-        is_shadow_ray);
+        is_shadow,
+        shadow_alpha);
 
     radiance += radiance_light_sampling;
 }
