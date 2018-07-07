@@ -126,7 +126,8 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
     const MISHeuristic          mis_heuristic,
     const Dual3d&               outgoing,
     DirectShadingComponents&    radiance,
-    LightPathStream*            light_path_stream) const
+    LightPathStream*            light_path_stream,
+    bool&                       is_shadow_ray) const
 {
     radiance.set(0.0f);
 
@@ -154,6 +155,8 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
                 radiance,
                 light_path_stream);
         }
+
+        is_shadow_ray = radiance.m_beauty == Spectrum(0.0f);
     }
 
     // Add contributions from the light set.
@@ -198,6 +201,8 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
         if (m_light_sample_count > 1)
             lightset_radiance /= static_cast<float>(m_light_sample_count);
 
+        is_shadow_ray = is_shadow_ray || (lightset_radiance.m_beauty == Spectrum(0.0f));
+
         radiance += lightset_radiance;
     }
 }
@@ -215,12 +220,14 @@ void DirectLightingIntegrator::compute_outgoing_radiance_combined_sampling_low_v
         radiance);
 
     DirectShadingComponents radiance_light_sampling;
+    bool is_shadow_ray;
     compute_outgoing_radiance_light_sampling_low_variance(
         sampling_context,
         MISPower2,
         outgoing,
         radiance_light_sampling,
-        light_path_stream);
+        light_path_stream,
+        is_shadow_ray);
 
     radiance += radiance_light_sampling;
 }
