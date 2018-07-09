@@ -682,7 +682,6 @@ namespace
                 }
 
                 // Direct lighting contribution.
-                float shadow_alpha = 0.0f;
                 bool is_shadow = false;
                 if (m_params.m_enable_dl || vertex.m_path_length > 1)
                 {
@@ -696,8 +695,7 @@ namespace
                             vertex.m_scattering_modes,
                             vertex_radiance,
                             m_light_path_stream,
-                            is_shadow,
-                            shadow_alpha);
+                            is_shadow);
                     }
                 }
 
@@ -728,8 +726,8 @@ namespace
                 {
                     if (is_shadow)
                     {
-                        m_aov_components.m_matte_shadow_alpha = 1.0f - saturate(vertex_radiance.m_beauty[0]);
-                        m_path_radiance.m_beauty *= average_value(vertex_radiance.m_beauty);
+                        m_aov_components.m_matte_shadow_alpha = 1.0f - saturate(luminance(vertex_radiance.m_beauty.to_rgb(g_std_lighting_conditions)));
+                        m_path_radiance.m_beauty *= vertex_radiance.m_beauty;
                     }
                 }
                 else
@@ -776,8 +774,7 @@ namespace
                 const int                   scattering_modes,
                 DirectShadingComponents&    vertex_radiance,
                 LightPathStream*            light_path_stream,
-                bool&                       is_shadow,
-                float&                      shadow_alpha)
+                bool&                       is_shadow)
             {
                 DirectShadingComponents dl_radiance;
 
@@ -812,8 +809,7 @@ namespace
                     outgoing,
                     dl_radiance,
                     light_path_stream,
-                    is_shadow,
-                    shadow_alpha);
+                    is_shadow);
 
                 // Divide by the sample count when this number is less than 1.
                 if (m_params.m_rcp_dl_light_sample_count > 0.0f)

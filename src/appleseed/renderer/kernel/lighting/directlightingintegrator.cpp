@@ -127,8 +127,7 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
     const Dual3d&               outgoing,
     DirectShadingComponents&    radiance,
     LightPathStream*            light_path_stream,
-    bool&                       is_shadow,
-    float&                      shadow_alpha) const
+    bool&                       is_shadow) const
 {
     radiance.set(0.0f);
     bool non_physical_shadow = false;
@@ -219,10 +218,6 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
         radiance += lightset_radiance;
 
         is_shadow = non_physical_shadow || lightset_shadow;
-
-        float lightset_value = saturate(lightset_radiance.m_beauty[0]);
-
-        shadow_alpha = 1.0f - lightset_value;
     }
 }
 
@@ -239,7 +234,6 @@ void DirectLightingIntegrator::compute_outgoing_radiance_combined_sampling_low_v
         radiance);
 
     DirectShadingComponents radiance_light_sampling;
-    float shadow_alpha;
     bool is_shadow;
     compute_outgoing_radiance_light_sampling_low_variance(
         sampling_context,
@@ -247,8 +241,7 @@ void DirectLightingIntegrator::compute_outgoing_radiance_combined_sampling_low_v
         outgoing,
         radiance_light_sampling,
         light_path_stream,
-        is_shadow,
-        shadow_alpha);
+        is_shadow);
 
     radiance += radiance_light_sampling;
 }
