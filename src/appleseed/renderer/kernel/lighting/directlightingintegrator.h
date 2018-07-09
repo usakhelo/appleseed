@@ -133,14 +133,16 @@ class DirectLightingIntegrator
         const foundation::MISHeuristic  mis_heuristic,
         const foundation::Dual3d&       outgoing,
         DirectShadingComponents&        radiance,
-        LightPathStream*                light_path_stream) const;
+        LightPathStream*                light_path_stream,
+        Spectrum&                       transmission) const;
 
     void add_non_physical_light_sample_contribution(
         SamplingContext&                sampling_context,
         const LightSample&              sample,
         const foundation::Dual3d&       outgoing,
         DirectShadingComponents&        radiance,
-        LightPathStream*                light_path_stream) const;
+        LightPathStream*                light_path_stream,
+        Spectrum&                       transmission) const;
 };
 
 }       // namespace renderer

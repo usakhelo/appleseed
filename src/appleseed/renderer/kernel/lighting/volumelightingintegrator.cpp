@@ -522,6 +522,7 @@ void VolumeLightingIntegrator::take_single_direction_sample(
     DirectShadingComponents&    radiance) const
 {
     radiance.set(0.0f);
+    Spectrum transmission;
 
     VolumeSampler volume_sampler(
         m_volume_ray,
@@ -565,7 +566,8 @@ void VolumeLightingIntegrator::take_single_direction_sample(
             mis_heuristic,
             Dual3d(m_volume_ray.m_dir),
             radiance,
-            nullptr);
+            nullptr,
+            transmission);
     }
     else
     {
@@ -574,7 +576,8 @@ void VolumeLightingIntegrator::take_single_direction_sample(
             *light_sample,
             Dual3d(m_volume_ray.m_dir),
             radiance,
-            nullptr);
+            nullptr,
+            transmission);
     }
 }
 
