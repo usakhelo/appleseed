@@ -728,8 +728,8 @@ namespace
                 {
                     if (is_shadow)
                     {
-                        m_aov_components.m_matte_shadow_alpha = shadow_alpha;
-                        m_path_radiance.m_beauty *= 1.0f - shadow_alpha;
+                        m_aov_components.m_matte_shadow_alpha = saturate(shadow_alpha);
+                        m_path_radiance.m_beauty *= 1.0f - saturate(shadow_alpha);
                     }
                 }
                 else

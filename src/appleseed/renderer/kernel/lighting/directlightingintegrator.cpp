@@ -132,6 +132,7 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
 {
     radiance.set(0.0f);
     bool non_physical_shadow = false;
+    bool lightset_shadow = false;
     is_shadow = false;
 
     // No light source in the scene.
@@ -151,16 +152,19 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
             LightSample sample;
             m_light_sampler.sample_non_physical_light(m_time, i, sample);
 
+            Spectrum transmission;
             add_non_physical_light_sample_contribution(
                 sampling_context,
                 sample,
                 outgoing,
                 radiance,
-                light_path_stream);
+                light_path_stream,
+                transmission);
+
+            if (!non_physical_shadow)
+                non_physical_shadow = max_value(transmission) == 0.0f;
         }
 
-        non_physical_shadow = radiance.m_beauty == Spectrum(0.0f);
-        shadow_alpha = non_physical_shadow ? 1.0f : 0.0f;
     }
 
     // Add contributions from the light set.
@@ -172,6 +176,8 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
 
         for (size_t i = 0, e = m_light_sample_count; i < e; ++i)
         {
+            Spectrum transmission;
+
             // Sample the light set.
             LightSample sample;
             m_light_sampler.sample_lightset(
@@ -189,7 +195,8 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
                     mis_heuristic,
                     outgoing,
                     lightset_radiance,
-                    light_path_stream);
+                    light_path_stream,
+                    transmission);
             }
             else
             {
@@ -198,8 +205,12 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
                     sample,
                     outgoing,
                     lightset_radiance,
-                    light_path_stream);
+                    light_path_stream,
+                    transmission);
             }
+
+            if (!lightset_shadow)
+                lightset_shadow = max_value(transmission) == 0.0f;
         }
 
         if (m_light_sample_count > 1)
@@ -207,15 +218,11 @@ void DirectLightingIntegrator::compute_outgoing_radiance_light_sampling_low_vari
 
         radiance += lightset_radiance;
 
-        bool lightset_shadow = lightset_radiance.m_beauty == Spectrum(0.0f);
-
-        if (non_physical_shadow)
-            shadow_alpha = shadow_alpha - saturate(lightset_radiance.m_beauty[0]);
-
-        if (lightset_shadow)
-            shadow_alpha = 1.0f;
-
         is_shadow = non_physical_shadow || lightset_shadow;
+
+        float lightset_value = saturate(lightset_radiance.m_beauty[0]);
+
+        shadow_alpha = 1.0f - lightset_value;
     }
 }
 
@@ -361,7 +368,8 @@ void DirectLightingIntegrator::add_emitting_triangle_sample_contribution(
     const MISHeuristic          mis_heuristic,
     const Dual3d&               outgoing,
     DirectShadingComponents&    radiance,
-    LightPathStream*            light_path_stream) const
+    LightPathStream*            light_path_stream,
+    Spectrum&                   transmission) const
 {
     const Material* material = sample.m_triangle->m_material;
     const Material::RenderData& material_data = material->get_render_data();
@@ -422,7 +430,6 @@ void DirectLightingIntegrator::add_emitting_triangle_sample_contribution(
     }
 
     // Compute the transmission factor between the light sample and the shading point.
-    Spectrum transmission;
     m_material_sampler.trace_between(
         m_shading_context,
         sample.m_point,
@@ -496,7 +503,8 @@ void DirectLightingIntegrator::add_non_physical_light_sample_contribution(
     const LightSample&          sample,
     const Dual3d&               outgoing,
     DirectShadingComponents&    radiance,
-    LightPathStream*            light_path_stream) const
+    LightPathStream*            light_path_stream,
+    Spectrum&                   transmission) const
 {
     const Light* light = sample.m_light;
 
@@ -526,7 +534,6 @@ void DirectLightingIntegrator::add_non_physical_light_sample_contribution(
     const Vector3d incoming = -emission_direction;
 
     // Compute the transmission factor between the light sample and the shading point.
-    Spectrum transmission;
     m_material_sampler.trace_between(
         m_shading_context,
         emission_position,
