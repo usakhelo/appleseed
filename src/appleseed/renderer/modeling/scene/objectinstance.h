@@ -196,6 +196,15 @@ class APPLESEED_DLLSYMBOL ObjectInstance
         OnFrameBeginRecorder&       recorder,
         foundation::IAbortSwitch*   abort_switch = nullptr) override;
 
+    enum HoldOutMode
+    {
+        Black               = 1 << 0,
+        Background          = 1 << 1,
+        ShadowsAlpha        = 1 << 2,
+        ReflectionsAlpha    = 1 << 3,
+        AffectAlpha         = 1 << 4
+    };
+
   private:
     friend class ObjectInstanceFactory;
 

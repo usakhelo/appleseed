@@ -138,6 +138,7 @@ struct ObjectInstance::Impl
     StringDictionary        m_front_material_mappings;
     StringDictionary        m_back_material_mappings;
     OIIO::ustring           m_sss_set_identifier;
+    int                     m_holdout;
 };
 
 ObjectInstance::ObjectInstance(
@@ -188,6 +189,9 @@ ObjectInstance::ObjectInstance(
 
     // Retrieve flip normals flag.
     m_flip_normals = params.get_optional<bool>("flip_normals");
+
+    //Retrieve holdout parameters
+    impl->m_holdout = params.get_optional<int>("holdout", 0);
 
     // No bound object yet.
     m_object = nullptr;
