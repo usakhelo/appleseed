@@ -43,10 +43,10 @@ class AOVComponents
   public:
     Spectrum            m_albedo;
     foundation::Color3f m_npr_shading;
-    float       m_matte_shadow_alpha;
-    float       m_matte_reflection_alpha;
-    float       m_matte_alpha;
     foundation::Color4f m_npr_contour;
+    float               m_matte_shadow_alpha;
+    float               m_matte_reflection_alpha;
+    float               m_matte_alpha;
 
     // Constructor. Clears all components to 0.
     AOVComponents();
