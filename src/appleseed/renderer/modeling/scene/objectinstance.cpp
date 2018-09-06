@@ -138,6 +138,7 @@ struct ObjectInstance::Impl
     StringDictionary        m_front_material_mappings;
     StringDictionary        m_back_material_mappings;
     OIIO::ustring           m_sss_set_identifier;
+    int                     m_holdout;
 };
 
 ObjectInstance::ObjectInstance(
@@ -190,7 +191,7 @@ ObjectInstance::ObjectInstance(
     m_flip_normals = params.get_optional<bool>("flip_normals");
 
     //Retrieve holdout parameters
-    m_holdout = params.get_optional<int>("holdout", 0);
+    impl->m_holdout = params.get_optional<int>("holdout", 0);
 
     // No bound object yet.
     m_object = nullptr;
@@ -365,6 +366,11 @@ void ObjectInstance::check_object() const
 {
     if (m_object == nullptr)
         throw ExceptionUnknownEntity(impl->m_object_name.c_str(), this);
+}
+
+int ObjectInstance::get_holdout_flags() const
+{
+    return impl->m_holdout;
 }
 
 namespace

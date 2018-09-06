@@ -722,7 +722,7 @@ namespace
                     clamp_contribution(vertex_radiance);
 
                 // If it's matte object then darken the radiance to show the shadow
-                if (vertex.m_path_length == 1 && strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_inst") == 0)
+                if (vertex.m_path_length == 1 && vertex.m_parent_shading_point->get_object_instance().get_holdout_flags() > 0)
                 {
                     if (is_shadow)
                     {

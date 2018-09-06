@@ -251,7 +251,7 @@ namespace
                     shading_result.composite_over(local_result);
                 }
 
-                if (shading_point_ptr->hit_surface() && strcmp(shading_point_ptr->get_object_instance().get_name(), "Box001_inst") == 0)
+                if (shading_point_ptr->hit_surface() && shading_point_ptr->get_object_instance().get_holdout_flags() > 0)
                 {
                     shading_result.m_main.a = shading_result.m_matte_alpha;
                     break;

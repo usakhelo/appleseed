@@ -111,7 +111,7 @@ class APPLESEED_DLLSYMBOL ObjectInstance
     void set_vis_flags(const foundation::uint32 flags);
 
     // Holdout flags
-    foundation::uint32 get_holdout_flags() const;
+    int get_holdout_flags() const;
 
     // Return the medium priority of this instance.
     foundation::int8 get_medium_priority() const;
@@ -220,7 +220,6 @@ class APPLESEED_DLLSYMBOL ObjectInstance
     double              m_ray_bias_distance;
     bool                m_transform_swaps_handedness;
     bool                m_flip_normals;
-    foundation::uint32  m_holdout;
 
     Object*             m_object;
     MaterialArray       m_front_materials;
@@ -278,11 +277,6 @@ inline bool ObjectInstance::flip_normals() const
 inline foundation::uint32 ObjectInstance::get_vis_flags() const
 {
     return m_vis_flags;
-}
-
-inline foundation::uint32 ObjectInstance::get_holdout_flags() const
-{
-    return m_holdout;
 }
 
 inline void ObjectInstance::set_vis_flags(const foundation::uint32 flags)

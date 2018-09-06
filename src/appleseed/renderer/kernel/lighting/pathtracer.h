@@ -282,9 +282,7 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
         if (!vertex.m_shading_point->hit_surface())
         {
             // Don't sample the background if it's second bounce from the matte surface (basically don't reflect background).
-            if (vertex.m_parent_shading_point != nullptr &&
-                vertex.m_parent_shading_point->get_object_instance().get_holdout_flags() > 0 &&
-                vertex.m_path_length == 2)
+            if (vertex.m_path_length == 2 && vertex.m_parent_shading_point->get_object_instance().get_holdout_flags() > 0)
             {
                 m_path_visitor.save_matte_alpha(Spectrum(0.0f));
                 break;
@@ -295,16 +293,10 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
         }
 
         // Shade background when hit matte object only if it is first hit. That way matte object is shown normally in reflection/refraction.
-        if (vertex.m_parent_shading_point != nullptr &&
-            vertex.m_parent_shading_point->get_object_instance().get_holdout_flags() > 0)
+        if (vertex.m_shading_point->get_object_instance().get_holdout_flags() > 0)
         {
             if (vertex.m_path_length == 1)
-            {
-                if (vertex.m_parent_shading_point->get_object_instance().get_holdout_flags() & 2)
-                    m_path_visitor.on_miss(vertex);
-                //else if (vertex.m_parent_shading_point->get_object_instance().get_holdout_flags() & 1)
-                //    break;
-            }
+                m_path_visitor.on_miss(vertex);
         }
 
         // Retrieve the material at the shading point.
@@ -751,7 +743,7 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
     vertex.m_throughput *= sample.m_value.m_beauty;
 
     // Stop scattering if it's matte object and it's not first glossy ray (to show reflection on the matte object).
-    if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_inst") == 0)
+    if (vertex.m_shading_point->get_object_instance().get_holdout_flags() > 0)
     {
         if (sample.m_mode != ScatteringMode::Glossy && vertex.m_path_length == 1)
             return false;
