@@ -282,7 +282,7 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
         if (!vertex.m_shading_point->hit_surface())
         {
             // Don't sample the background if it's second bounce from the matte surface (basically don't reflect background).
-            if (vertex.m_path_length == 2 && vertex.m_parent_shading_point->get_object_instance().get_holdout_flags() > 0)
+            if (vertex.m_path_length == 2 && vertex.m_shading_point->get_object_instance().get_holdout_flags() > 0)
             {
                 m_path_visitor.save_matte_alpha(Spectrum(0.0f));
                 break;
@@ -296,7 +296,10 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
         if (vertex.m_shading_point->get_object_instance().get_holdout_flags() > 0)
         {
             if (vertex.m_path_length == 1)
-                m_path_visitor.on_miss(vertex);
+            {
+                if (vertex.m_shading_point->get_object_instance().get_holdout_flags() & ObjectInstance::HoldOutMode::Background)
+                    m_path_visitor.on_miss(vertex);
+            }
         }
 
         // Retrieve the material at the shading point.
