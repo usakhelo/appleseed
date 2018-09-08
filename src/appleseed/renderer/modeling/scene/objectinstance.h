@@ -201,11 +201,13 @@ class APPLESEED_DLLSYMBOL ObjectInstance
 
     enum HoldOutMode
     {
-        Black               = 1 << 0,
-        Background          = 1 << 1,
-        ShadowsAlpha        = 1 << 2,
-        ReflectionsAlpha    = 1 << 3,
-        AffectAlpha         = 1 << 4
+        Black           = 1 << 0,
+        Background      = 1 << 1,
+        Shadows         = 1 << 2,
+        Reflection      = 1 << 3,
+        AffectAlpha     = 1 << 4,
+        ShadowsAlpha    = 1 << 5,
+        ReflectionAlpha = 1 << 6
     };
 
   private:

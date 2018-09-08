@@ -726,8 +726,11 @@ namespace
                 {
                     if (is_shadow)
                     {
-                        m_aov_components.m_matte_shadow_alpha = 1.0f - saturate(luminance(vertex_radiance.m_beauty.to_rgb(g_std_lighting_conditions)));
-                        m_path_radiance.m_beauty *= vertex_radiance.m_beauty;
+                        if (vertex.m_shading_point->get_object_instance().get_holdout_flags() & ObjectInstance::HoldOutMode::ShadowsAlpha)
+                            m_aov_components.m_matte_shadow_alpha = 1.0f - saturate(luminance(vertex_radiance.m_beauty.to_rgb(g_std_lighting_conditions)));
+
+                        if (vertex.m_shading_point->get_object_instance().get_holdout_flags() & ObjectInstance::HoldOutMode::Shadows)
+                            m_path_radiance.m_beauty *= vertex_radiance.m_beauty;
                     }
                 }
                 else

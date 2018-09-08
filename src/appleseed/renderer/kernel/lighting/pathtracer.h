@@ -750,11 +750,17 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
     // Stop scattering if it's matte object and it's not first glossy ray (to show reflection on the matte object).
     if (vertex.m_shading_point->get_object_instance().get_holdout_flags() > 0)
     {
-        if (sample.m_mode != ScatteringMode::Glossy && vertex.m_path_length == 1)
+        if (vertex.m_shading_point->get_object_instance().get_holdout_flags() & ObjectInstance::HoldOutMode::ReflectionAlpha)
+        {
+            if (sample.m_mode == ScatteringMode::Glossy)
+                m_path_visitor.save_matte_alpha(sample.m_value.m_glossy);
+        }
+
+        if (!(vertex.m_shading_point->get_object_instance().get_holdout_flags() & ObjectInstance::HoldOutMode::Reflection))
             return false;
 
-        if (sample.m_mode == ScatteringMode::Glossy)
-            m_path_visitor.save_matte_alpha(sample.m_value.m_glossy);
+        if (sample.m_mode != ScatteringMode::Glossy && vertex.m_path_length == 1)
+            return false;
     }
 
     // Update bounce counters.
