@@ -286,7 +286,7 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
                 vertex.m_parent_shading_point != nullptr &&
                 vertex.m_parent_shading_point->get_object_instance().get_holdout_flags() > 0)
             {
-                m_path_visitor.save_matte_alpha(Spectrum(0.0f));
+                m_path_visitor.save_reflection_matte_alpha(Spectrum(0.0f));
                 break;
             }
 
@@ -753,7 +753,7 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
         if (vertex.m_shading_point->get_object_instance().get_holdout_flags() & ObjectInstance::HoldOutMode::ReflectionAlpha)
         {
             if (sample.m_mode == ScatteringMode::Glossy)
-                m_path_visitor.save_matte_alpha(sample.m_value.m_glossy);
+                m_path_visitor.save_reflection_matte_alpha(sample.m_value.m_glossy);
         }
 
         if (!(vertex.m_shading_point->get_object_instance().get_holdout_flags() & ObjectInstance::HoldOutMode::Reflection))

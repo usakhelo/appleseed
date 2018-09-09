@@ -353,7 +353,7 @@ namespace
                 m_aov_components.m_albedo = vertex.m_albedo;
             }
 
-            void save_matte_alpha(const Spectrum& value)
+            void save_reflection_matte_alpha(const Spectrum& value)
             {
                 m_aov_components.m_matte_reflection_alpha = luminance(value.to_rgb(g_std_lighting_conditions));
             }

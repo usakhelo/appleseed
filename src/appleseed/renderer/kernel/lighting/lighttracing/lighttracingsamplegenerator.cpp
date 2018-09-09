@@ -306,7 +306,7 @@ namespace
             {
             }
 
-            void save_matte_alpha(const Spectrum& value)
+            void save_reflection_matte_alpha(const Spectrum& value)
             {
             }
 
