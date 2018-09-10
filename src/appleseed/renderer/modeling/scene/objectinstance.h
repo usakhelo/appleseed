@@ -113,6 +113,9 @@ class APPLESEED_DLLSYMBOL ObjectInstance
     // Holdout flags
     int get_holdout_flags() const;
 
+    // Alpha flags
+    int get_alpha_flags() const;
+
     // Return the medium priority of this instance.
     foundation::int8 get_medium_priority() const;
 
@@ -201,13 +204,18 @@ class APPLESEED_DLLSYMBOL ObjectInstance
 
     enum HoldOutMode
     {
-        Black           = 1 << 0,
-        Background      = 1 << 1,
-        Shadows         = 1 << 2,
-        Reflection      = 1 << 3,
-        AffectAlpha     = 1 << 4,
-        ShadowsAlpha    = 1 << 5,
-        ReflectionAlpha = 1 << 6
+        Cutout              = 1 << 0,
+        Background          = 1 << 1,
+        Shadows             = 1 << 2,
+        Reflection          = 1 << 3,
+    };
+
+    enum AlphaMode
+    {
+        HoldOut             = 1 << 0,
+        ShadowHoldOut       = 1 << 1,
+        ReflectionHoldOut   = 1 << 2,
+        Refraction          = 1 << 3
     };
 
   private:

@@ -294,12 +294,15 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
             break;
         }
 
+        // Retrieve the object instance at the shading point.
+        const ObjectInstance& object_instance = vertex.m_shading_point->get_object_instance();
+
         // Shade background when hit matte object only if it is first hit. That way matte object is shown normally in reflection/refraction.
-        if (vertex.m_shading_point->get_object_instance().get_holdout_flags() > 0)
+        if (object_instance.get_holdout_flags() > 0)
         {
             if (vertex.m_path_length == 1)
             {
-                if (vertex.m_shading_point->get_object_instance().get_holdout_flags() & ObjectInstance::HoldOutMode::Background)
+                if (object_instance.get_holdout_flags() & ObjectInstance::HoldOutMode::Background)
                     m_path_visitor.on_miss(vertex);
             }
         }
@@ -313,9 +316,6 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
 
         // Retrieve the material's render data.
         const Material::RenderData& material_data = material->get_render_data();
-
-        // Retrieve the object instance at the shading point.
-        const ObjectInstance& object_instance = vertex.m_shading_point->get_object_instance();
 
         // Determine whether the ray is entering or leaving a medium.
         const bool entering = vertex.m_shading_point->is_entering();
@@ -747,17 +747,19 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
         sample.m_value /= sample.m_probability;
     vertex.m_throughput *= sample.m_value.m_beauty;
 
+    const ObjectInstance& object_instance = vertex.m_shading_point->get_object_instance();
+
     // Stop scattering if it's matte object and it's not first glossy ray (to show reflection on the matte object).
-    if (vertex.m_shading_point->get_object_instance().get_holdout_flags() > 0)
+    if (object_instance.get_holdout_flags() > 0)
     {
-        if (vertex.m_shading_point->get_object_instance().get_holdout_flags() & ObjectInstance::HoldOutMode::ReflectionAlpha)
+        if (!(object_instance.get_holdout_flags() & ObjectInstance::HoldOutMode::Reflection))
+            return false;
+
+        if (object_instance.get_alpha_flags() & ObjectInstance::AlphaMode::ReflectionHoldOut)
         {
             if (sample.m_mode == ScatteringMode::Glossy)
                 m_path_visitor.save_reflection_matte_alpha(sample.m_value.m_glossy);
         }
-
-        if (!(vertex.m_shading_point->get_object_instance().get_holdout_flags() & ObjectInstance::HoldOutMode::Reflection))
-            return false;
 
         if (sample.m_mode != ScatteringMode::Glossy && vertex.m_path_length == 1)
             return false;

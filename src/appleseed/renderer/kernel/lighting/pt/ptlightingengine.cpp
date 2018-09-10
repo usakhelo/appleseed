@@ -726,7 +726,7 @@ namespace
                 {
                     if (is_shadow)
                     {
-                        if (vertex.m_shading_point->get_object_instance().get_holdout_flags() & ObjectInstance::HoldOutMode::ShadowsAlpha)
+                        if (vertex.m_shading_point->get_object_instance().get_alpha_flags() & ObjectInstance::AlphaMode::ShadowHoldOut)
                             m_aov_components.m_matte_shadow_alpha = 1.0f - saturate(luminance(vertex_radiance.m_beauty.to_rgb(g_std_lighting_conditions)));
 
                         if (vertex.m_shading_point->get_object_instance().get_holdout_flags() & ObjectInstance::HoldOutMode::Shadows)

@@ -139,6 +139,7 @@ struct ObjectInstance::Impl
     StringDictionary        m_back_material_mappings;
     OIIO::ustring           m_sss_set_identifier;
     int                     m_holdout;
+    int                     m_alpha;
 };
 
 ObjectInstance::ObjectInstance(
@@ -193,6 +194,9 @@ ObjectInstance::ObjectInstance(
     //Retrieve holdout parameters
     impl->m_holdout = params.get_optional<int>("holdout", 0);
 
+    //Retrieve alpha parameters
+    impl->m_alpha = params.get_optional<int>("alpha", 0);
+
     // No bound object yet.
     m_object = nullptr;
 }
@@ -231,6 +235,17 @@ bool ObjectInstance::is_in_same_sss_set(const ObjectInstance& other) const
         return false;
 
     return impl->m_sss_set_identifier == other.impl->m_sss_set_identifier;
+}
+
+
+int ObjectInstance::get_holdout_flags() const
+{
+    return impl->m_holdout;
+}
+
+int ObjectInstance::get_alpha_flags() const
+{
+    return impl->m_alpha;
 }
 
 const Transformd& ObjectInstance::get_transform() const
@@ -366,11 +381,6 @@ void ObjectInstance::check_object() const
 {
     if (m_object == nullptr)
         throw ExceptionUnknownEntity(impl->m_object_name.c_str(), this);
-}
-
-int ObjectInstance::get_holdout_flags() const
-{
-    return impl->m_holdout;
 }
 
 namespace
