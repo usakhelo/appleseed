@@ -47,6 +47,7 @@ class AOVComponents
     float               m_matte_shadow_alpha;
     float               m_matte_reflection_alpha;
     float               m_matte_alpha;
+    float               m_refraction_alpha;
 
     // Constructor. Clears all components to 0.
     AOVComponents();

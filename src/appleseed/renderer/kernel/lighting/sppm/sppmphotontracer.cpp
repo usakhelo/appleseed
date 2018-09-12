@@ -127,6 +127,10 @@ namespace
         {
         }
 
+        void apply_refraction_alpha(const float value)
+        {
+        }
+
         bool accept_scattering(
             const ScatteringMode::Mode  prev_mode,
             const ScatteringMode::Mode  next_mode) const

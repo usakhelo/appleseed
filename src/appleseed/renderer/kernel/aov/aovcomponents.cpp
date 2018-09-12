@@ -43,6 +43,7 @@ AOVComponents::AOVComponents()
   , m_matte_reflection_alpha(0.0f)
   , m_matte_shadow_alpha(0.0f)
   , m_matte_alpha(0.0f)
+  , m_refraction_alpha(0.0f)
 {
 }
 

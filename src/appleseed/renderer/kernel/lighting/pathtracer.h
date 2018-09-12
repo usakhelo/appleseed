@@ -124,6 +124,8 @@ class PathTracer
     size_t                      m_volume_bounces;
     size_t                      m_iterations;
     foundation::Arena           m_shading_point_arena;
+    bool                        m_only_refraction_sample;
+    float                       m_refraction_alpha;
 
     // Determine whether a ray can pass through a surface with a given alpha value.
     static bool pass_through(
@@ -235,6 +237,8 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
     m_specular_bounces = 0;
     m_volume_bounces = 0;
     m_iterations = 0;
+    m_only_refraction_sample = true;
+    m_refraction_alpha = 1.0f;
 
     while (true)
     {
@@ -283,11 +287,19 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
         {
             // Don't sample the background if it's second bounce from the matte surface (basically don't reflect background).
             if (vertex.m_path_length == 2 &&
-                vertex.m_parent_shading_point != nullptr &&
-                vertex.m_parent_shading_point->get_object_instance().get_holdout_flags() > 0)
+                vertex.m_parent_shading_point != nullptr)
             {
-                m_path_visitor.save_reflection_matte_alpha(Spectrum(0.0f));
-                break;
+                if (vertex.m_parent_shading_point->get_object_instance().get_holdout_flags() > 0)
+                {
+                    m_path_visitor.save_reflection_matte_alpha(Spectrum(0.0f));
+                    break;
+                }
+            }
+
+            if (vertex.m_parent_shading_point->get_object_instance().get_alpha_flags() & ObjectInstance::AlphaMode::Refraction)
+            {
+                if (m_only_refraction_sample)
+                    m_path_visitor.apply_refraction_alpha(m_refraction_alpha);
             }
 
             m_path_visitor.on_miss(vertex);
@@ -711,6 +723,9 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
 
         next_ray.m_max_roughness = m_clamp_roughness ? sample.m_max_roughness : 0.0f;
 
+        if (!sample.m_is_refraction_sample)
+            m_only_refraction_sample = false;
+
         if (sample.m_mode == ScatteringMode::Diffuse && !vertex.m_albedo_saved)
         {
             vertex.m_albedo = sample.m_aov_components.m_albedo;
@@ -764,6 +779,9 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
         if (sample.m_mode != ScatteringMode::Glossy && vertex.m_path_length == 1)
             return false;
     }
+
+    if (object_instance.get_alpha_flags() & ObjectInstance::AlphaMode::Refraction)
+        m_refraction_alpha *= average_value(sample.m_value.m_glossy);
 
     // Update bounce counters.
     ++vertex.m_path_length;

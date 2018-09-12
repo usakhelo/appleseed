@@ -252,7 +252,7 @@ namespace
                 }
 
                 if (shading_point_ptr->hit_surface() &&
-                    shading_point_ptr->get_object_instance().get_alpha_flags() & ObjectInstance::AlphaMode::HoldOut)
+                    shading_point_ptr->get_object_instance().get_alpha_flags() > 0)
                 {
                     shading_result.m_main.a = shading_result.m_matte_alpha;
                     break;

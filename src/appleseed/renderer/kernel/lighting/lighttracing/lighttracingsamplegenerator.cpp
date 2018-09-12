@@ -310,6 +310,10 @@ namespace
             {
             }
 
+            void apply_refraction_alpha(const float value)
+            {
+            }
+
             size_t get_sample_count() const
             {
                 return m_sample_count;

@@ -358,6 +358,11 @@ namespace
                 m_aov_components.m_matte_reflection_alpha = luminance(value.to_rgb(g_std_lighting_conditions));
             }
 
+            void apply_refraction_alpha(const float value)
+            {
+                m_aov_components.m_refraction_alpha = saturate(value);
+            }
+
             bool accept_scattering(
                 const ScatteringMode::Mode  prev_mode,
                 const ScatteringMode::Mode  next_mode)

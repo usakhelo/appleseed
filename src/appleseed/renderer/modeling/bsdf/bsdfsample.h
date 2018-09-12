@@ -67,6 +67,7 @@ class BSDFSample
     float                           m_probability;          // PDF value, defined only if m_mode != None
     DirectShadingComponents         m_value;                // BSDF value, defined only if m_mode != None
     AOVComponents                   m_aov_components;
+    bool                            m_is_refraction_sample;
 
     // Constructor.
     BSDFSample(
@@ -99,6 +100,7 @@ inline BSDFSample::BSDFSample(
   , m_shading_basis(shading_point->get_shading_basis())
   , m_outgoing(outgoing)
   , m_mode(ScatteringMode::None)
+  , m_is_refraction_sample(false)
 {
 }
 

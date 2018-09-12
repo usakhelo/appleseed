@@ -131,7 +131,12 @@ namespace
             shading_result.m_main.rgb() =
                 shading_components.m_beauty.to_rgb(g_std_lighting_conditions);
 
-            shading_result.m_matte_alpha = saturate(aov_components.m_matte_shadow_alpha + aov_components.m_matte_reflection_alpha);
+            shading_result.m_matte_alpha = saturate(
+                aov_components.m_matte_shadow_alpha +
+                aov_components.m_matte_reflection_alpha);
+
+            if (shading_point.get_object_instance().get_alpha_flags() & ObjectInstance::AlphaMode::Refraction)
+                shading_result.m_matte_alpha += 1.0f - aov_components.m_refraction_alpha;
         }
     };
 }
