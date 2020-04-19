@@ -488,7 +488,7 @@
                 <parameter name="dl_low_light_threshold" value="0" />
                 <parameter name="enable_caustics" value="false" />
                 <parameter name="enable_dl" value="true" />
-                <parameter name="enable_ibl" value="false" />
+                <parameter name="enable_ibl" value="true" />
                 <parameter name="ibl_env_samples" value="1" />
                 <parameter name="max_bounces" value="8" />
                 <parameter name="max_diffuse_bounces" value="3" />
