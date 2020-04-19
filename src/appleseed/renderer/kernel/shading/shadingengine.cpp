@@ -38,6 +38,8 @@
 #include "renderer/kernel/shading/shadingcontext.h"
 #include "renderer/kernel/shading/shadingray.h"
 #include "renderer/kernel/shading/shadingresult.h"
+#include "renderer/kernel/shading/shadowcatcher.h"
+#include "renderer/modeling/color/colorspace.h"
 #include "renderer/modeling/environment/environment.h"
 #include "renderer/modeling/environmentshader/environmentshader.h"
 #include "renderer/modeling/input/source.h"
@@ -181,6 +183,10 @@ bool ShadingEngine::shade_hit_point(
             }
         }
 
+        ShadowCatcher shadow_catcher_data;
+        if (strcmp(shading_point.get_object_instance().get_name(), "Box001_sc_inst") == 0)
+            shadow_catcher_data.m_enabled = true;
+
         // Execute the surface shader.
         ShadingComponents shading_components;
         AOVComponents aov_components;
@@ -191,7 +197,8 @@ bool ShadingEngine::shade_hit_point(
             shading_point,
             shading_result,
             shading_components,
-            aov_components);
+            aov_components,
+            shadow_catcher_data);
 
         // Accumulate shading components and AOV components into the shading result and AOVs.
         aov_accumulators.write(
@@ -200,6 +207,36 @@ bool ShadingEngine::shade_hit_point(
             shading_components,
             aov_components,
             shading_result);
+
+        // If it's shadow catcher
+        // find unshaded value of a sample on shadow catcher
+        // find shaded value of the same sample
+        // find ratio and derive alpha value from it (per ospray)
+
+        // we probably need to pass something to lighting engine to get following information back
+        // light sample intencity (and position) to calculate unshaded value of the sample
+        // flag that shows that sample wasn't lit at all
+
+        // for each sample on sh. catcher
+        // check if it hits the light, if it is then it's unshaded value
+        // shaded value is normal rendering
+        // ratio = min (throughput, shaded / unshaded * throughput)
+        // alpha = 1.0f - ratio
+        if (strcmp(shading_point.get_object_instance().get_name(), "Box001_sc_inst") == 0)
+        {
+            float unshaded_value = luminance(shadow_catcher_data.m_direct_unshaded_radiance.to_rgb(g_std_lighting_conditions));
+            float shaded_value = luminance(shadow_catcher_data.m_direct_shaded_radiance.to_rgb(g_std_lighting_conditions));
+
+            if (unshaded_value == shaded_value)
+            {
+                shading_result.m_main.a = 1.0f - saturate(unshaded_value);
+            }
+            else
+            {
+                shading_result.m_main.a = 1.0f - saturate(shaded_value * safe_rcp(unshaded_value, 0.0f));
+            }
+            return true;
+        }
 
         // Apply alpha premultiplication.
         shading_result.apply_alpha_premult();

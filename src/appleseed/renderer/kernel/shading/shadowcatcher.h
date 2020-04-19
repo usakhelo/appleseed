@@ -31,56 +31,33 @@
 
 // appleseed.renderer headers.
 #include "renderer/global/globaltypes.h"
-#include "renderer/modeling/entity/connectableentity.h"
 
 // appleseed.foundation headers.
-#include "foundation/utility/uid.h"
+#include "foundation/core/concepts/noncopyable.h"
 
-// appleseed.main headers.
-#include "main/dllsymbol.h"
-
-// Forward declarations.
-namespace renderer  { class AOVComponents; }
-namespace renderer  { class ParamArray; }
-namespace renderer  { class PixelContext; }
-namespace renderer  { class ShadingComponents; }
-namespace renderer  { class ShadingContext; }
-namespace renderer  { class ShadingPoint; }
-namespace renderer  { class ShadingResult; }
-namespace renderer  { class ShadowCatcher; }
 
 namespace renderer
 {
 
 //
-// Surface shader.
+// Shadow Catcher structure to store per sample information.
 //
 
-class APPLESEED_DLLSYMBOL SurfaceShader
-  : public ConnectableEntity
+class ShadowCatcher
+  : public foundation::NonCopyable
 {
   public:
-    // Return the unique ID of this class of entities.
-    static foundation::UniqueID get_class_uid();
+      ShadowCatcher()
+        : m_enabled(false)
+      {
+          m_direct_unshaded_radiance.set(0.0f);
+          m_direct_shaded_radiance.set(0.0f);
+      }
 
-    // Constructor.
-    SurfaceShader(
-        const char*             name,
-        const ParamArray&       params);
+    Spectrum                m_direct_unshaded_radiance;
+    Spectrum                m_direct_shaded_radiance;
 
-    // Return a string identifying the model of this entity.
-    virtual const char* get_model() const = 0;
-
-    // Evaluate the shading at a given point.
-    virtual void evaluate(
-        SamplingContext&        sampling_context,
-        const PixelContext&     pixel_context,
-        const ShadingContext&   shading_context,
-        const ShadingPoint&     shading_point,
-        ShadingResult&          shading_result,
-        ShadingComponents&      shading_components,
-        AOVComponents&          aov_components,
-        ShadowCatcher&          shadow_catcher_data) const = 0;
+    bool                    m_enabled;
 };
 
 }   // namespace renderer
