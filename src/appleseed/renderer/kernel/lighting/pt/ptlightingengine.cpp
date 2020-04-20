@@ -831,6 +831,54 @@ namespace
                     m_shadow_catcher_data.m_direct_shaded_radiance += shaded_radiance;
                 }
 
+                if (/*vertex.m_scattering_modes == ScatteringMode::Specular && */vertex.m_path_length > 1 && strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0)
+                {
+                    //ScatteringMode::has_specular(vertex.m_scattering_modes);
+
+                    //if (vertex.m_scattering_modes == ScatteringMode::None)
+                        //;
+                    // Evaluate the environment EDF.
+                    Spectrum env_radiance(Spectrum::Illuminance);
+                    float env_prob;
+                    m_env_edf->evaluate(
+                        m_shading_context,
+                        -Vector3f(vertex.m_outgoing.get_value()),
+                        env_radiance,
+                        env_prob);
+
+                    // This may happen for points of the environment map with infinite components,
+                    // which are then excluded from importance sampling and thus have zero weight.
+                    if (env_prob == 0.0f)
+                        return;
+
+                    // Multiple importance sampling.
+                    if (vertex.m_prev_mode != ScatteringMode::Specular)
+                    {
+                        assert(vertex.m_prev_prob > 0.0f);
+                        const float env_sample_count = std::max(m_params.m_ibl_env_sample_count, 1.0f);
+                        const float mis_weight =
+                            mis_power2(
+                                1.0f * vertex.m_prev_prob,
+                                env_sample_count * env_prob);
+                        env_radiance *= mis_weight;
+                    }
+
+                    // Apply path throughput.
+                    //env_radiance *= vertex.m_throughput;
+                    //env_radiance *= m_shadow_catcher_data.m_direct_shaded_radiance;
+                    //madd(vertex_radiance, material_value, env_radiance);
+
+                    // Update path radiance.
+                    //m_path_radiance.add_emission(
+                    //    vertex.m_path_length,
+                    //    vertex.m_aov_mode,
+                    //    env_radiance);
+
+                    //vertex_radiance.m_beauty = env_radiance;
+                    //vertex_radiance.m_glossy = env_radiance;
+                    vertex_radiance.set(0.0f);
+                }
+
                 // Optionally clamp secondary rays contribution.
                 if (m_params.m_has_max_ray_intensity && vertex.m_path_length > 1 && vertex.m_prev_mode != ScatteringMode::Specular)
                     clamp_contribution(vertex_radiance, m_params.m_max_ray_intensity);
@@ -840,6 +888,8 @@ namespace
                     vertex.m_path_length,
                     vertex.m_aov_mode,
                     vertex_radiance);
+
+                return;
             }
 
           private:
