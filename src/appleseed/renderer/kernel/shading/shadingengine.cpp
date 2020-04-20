@@ -211,7 +211,7 @@ bool ShadingEngine::shade_hit_point(
         // If it's shadow catcher
         // find unshaded value of a sample on shadow catcher
         // find shaded value of the same sample
-        // find ratio and derive alpha value from it (per ospray)
+        // find shadow_value and derive alpha value from it (per ospray)
 
         // we probably need to pass something to lighting engine to get following information back
         // light sample intencity (and position) to calculate unshaded value of the sample
@@ -220,21 +220,48 @@ bool ShadingEngine::shade_hit_point(
         // for each sample on sh. catcher
         // check if it hits the light, if it is then it's unshaded value
         // shaded value is normal rendering
-        // ratio = min (throughput, shaded / unshaded * throughput)
-        // alpha = 1.0f - ratio
+        // shadow_value = min (throughput, shaded / unshaded * throughput)
+        // alpha = 1.0f - shadow_value
         if (strcmp(shading_point.get_object_instance().get_name(), "Box001_sc_inst") == 0)
         {
             float unshaded_value = luminance(shadow_catcher_data.m_direct_unshaded_radiance.to_rgb(g_std_lighting_conditions));
             float shaded_value = luminance(shadow_catcher_data.m_direct_shaded_radiance.to_rgb(g_std_lighting_conditions));
 
+            // Evaluate environment to replace shadow catcher shader pixels
+
+            // Retrieve the environment shader of the scene.
+            const EnvironmentShader* environment_shader =
+                shading_point.get_scene().get_environment()->get_environment_shader();
+
+            if (environment_shader != nullptr)
+            {
+                // There is an environment shader: execute it.
+                ShadingComponents env_shading_components;
+                AOVComponents env_aov_components;
+                environment_shader->evaluate(
+                    shading_context,
+                    pixel_context,
+                    normalize(shading_point.get_ray().m_dir),
+                    shading_result,
+                    env_shading_components,
+                    env_aov_components);
+            }
+
+            float shadow_value;
             if (unshaded_value == shaded_value)
             {
-                shading_result.m_main.a = 1.0f - saturate(unshaded_value);
+                shadow_value = saturate(unshaded_value);
             }
             else
             {
-                shading_result.m_main.a = 1.0f - saturate(shaded_value * safe_rcp(unshaded_value, 0.0f));
+                shadow_value = saturate(shaded_value * safe_rcp(unshaded_value, 0.0f));
             }
+
+            shading_result.m_main.a = 1.0f - shadow_value;
+            shading_result.m_main.r *= shadow_value;
+            shading_result.m_main.g *= shadow_value;
+            shading_result.m_main.b *= shadow_value;
+
             return true;
         }
 
