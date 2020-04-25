@@ -28,6 +28,8 @@
         </camera>
         <color name="environment_edf_color">
             <parameter name="color_space" value="linear_rgb" />
+            <parameter name="multiplier" value="2" />
+            <parameter name="wavelength_range" value="400.0 700.0" />
             <values>
                 0.709803998 0.494118005 0.278430998
             </values>
@@ -232,46 +234,6 @@
                 <parameter name="alpha_map" value="1" />
                 <parameter name="osl_surface" value="Material #33_mat_shader_group" />
             </material>
-            <light name="Spot001" model="max_spot_light">
-                <parameter name="cast_indirect_light" value="true" />
-                <parameter name="cast_shadows" value="true" />
-                <parameter name="decay_exponent" value="0.0" />
-                <parameter name="decay_start" value="40.0" />
-                <parameter name="importance_multiplier" value="1.0" />
-                <parameter name="inner_angle" value="25" />
-                <parameter name="intensity" value="Spot001_color" />
-                <parameter name="intensity_multiplier" value="1.5708" />
-                <parameter name="outer_angle" value="45.0" />
-                <parameter name="tilt_angle" value="0.0" />
-                <transform>
-                    <matrix>
-                        -0.97775429487228394 0.12909755110740662 -0.16531893610954285 -33.91470336914062500
-                        0.00000000000000000 0.78815817832946777 0.61547267436981201 86.16923522949218750
-                        0.20975349843502045 0.60178107023239136 -0.77062505483627319 -116.81442260742187500
-                        0.00000000000000000 0.00000000000000000 0.00000000000000000 1.00000000000000000
-                    </matrix>
-                </transform>
-            </light>
-            <light name="Spot002" model="max_spot_light">
-                <parameter name="cast_indirect_light" value="true" />
-                <parameter name="cast_shadows" value="true" />
-                <parameter name="decay_exponent" value="0.0" />
-                <parameter name="decay_start" value="40.0" />
-                <parameter name="importance_multiplier" value="1.0" />
-                <parameter name="inner_angle" value="25" />
-                <parameter name="intensity" value="Spot002_color" />
-                <parameter name="intensity_multiplier" value="1.5708" />
-                <parameter name="outer_angle" value="45.0" />
-                <parameter name="tilt_angle" value="0.0" />
-                <transform>
-                    <matrix>
-                        0.38080143928527832 -0.72328597307205200 0.57606220245361328 76.56296539306640625
-                        0.00000000000000000 0.62300109863281250 0.78222095966339111 118.58628082275390625
-                        -0.92465680837631226 -0.29787090420722961 0.23723970353603363 27.04294013977050781
-                        0.00000000000000000 0.00000000000000000 0.00000000000000000 1.00000000000000000
-                    </matrix>
-                </transform>
-            </light>
             <object name="Box001_sc" model="mesh_object">
                 <parameter name="filename" value="Box001_sc.binarymesh" />
             </object>
@@ -500,8 +462,8 @@
                 <parameter name="dl_light_samples" value="1" />
                 <parameter name="dl_low_light_threshold" value="0" />
                 <parameter name="enable_caustics" value="false" />
-                <parameter name="enable_dl" value="true" />
-                <parameter name="enable_ibl" value="false" />
+                <parameter name="enable_dl" value="false" />
+                <parameter name="enable_ibl" value="true" />
                 <parameter name="ibl_env_samples" value="1" />
                 <parameter name="max_bounces" value="8" />
                 <parameter name="max_diffuse_bounces" value="3" />

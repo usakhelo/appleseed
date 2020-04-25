@@ -229,23 +229,23 @@ bool ShadingEngine::shade_hit_point(
 
             // Evaluate environment to replace shadow catcher shader pixels
 
-            // Retrieve the environment shader of the scene.
-            const EnvironmentShader* environment_shader =
-                shading_point.get_scene().get_environment()->get_environment_shader();
+            //// Retrieve the environment shader of the scene.
+            //const EnvironmentShader* environment_shader =
+            //    shading_point.get_scene().get_environment()->get_environment_shader();
 
-            if (environment_shader != nullptr)
-            {
-                // There is an environment shader: execute it.
-                ShadingComponents env_shading_components;
-                AOVComponents env_aov_components;
-                environment_shader->evaluate(
-                    shading_context,
-                    pixel_context,
-                    normalize(shading_point.get_ray().m_dir),
-                    shading_result,
-                    env_shading_components,
-                    env_aov_components);
-            }
+            //if (environment_shader != nullptr)
+            //{
+            //    // There is an environment shader: execute it.
+            //    ShadingComponents env_shading_components;
+            //    AOVComponents env_aov_components;
+            //    environment_shader->evaluate(
+            //        shading_context,
+            //        pixel_context,
+            //        normalize(shading_point.get_ray().m_dir),
+            //        shading_result,
+            //        env_shading_components,
+            //        env_aov_components);
+            //}
 
             float shadow_value;
             if (unshaded_value == shaded_value)
@@ -257,10 +257,10 @@ bool ShadingEngine::shade_hit_point(
                 shadow_value = saturate(shaded_value * safe_rcp(unshaded_value, 0.0f));
             }
 
-            shading_result.m_main.a = 1.0f - shadow_value;
-            shading_result.m_main.r *= shadow_value;
-            shading_result.m_main.g *= shadow_value;
-            shading_result.m_main.b *= shadow_value;
+            //shading_result.m_main.a = 1.0f - shadow_value;
+            //shading_result.m_main.r *= shadow_value;
+            //shading_result.m_main.g *= shadow_value;
+            //shading_result.m_main.b *= shadow_value;
 
             return true;
         }

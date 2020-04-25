@@ -47,6 +47,7 @@
 #include "renderer/kernel/shading/shadingpoint.h"
 #include "renderer/kernel/shading/shadowcatcher.h"
 #include "renderer/modeling/bsdf/bsdf.h"
+#include "renderer/modeling/color/colorspace.h"
 #include "renderer/modeling/edf/edf.h"
 #include "renderer/modeling/environment/environment.h"
 #include "renderer/modeling/environmentedf/environmentedf.h"
@@ -602,8 +603,13 @@ namespace
                 if (m_params.m_has_max_ray_intensity && vertex.m_path_length > 1 && vertex.m_prev_mode != ScatteringMode::Specular)
                     clamp_contribution(env_radiance, m_params.m_max_ray_intensity);
 
-                m_shadow_catcher_data.m_direct_shaded_radiance += env_radiance;
-                m_shadow_catcher_data.m_direct_unshaded_radiance += env_radiance;
+                // Only apply if it bounced off the shadow catcher
+                if (strcmp(vertex.m_parent_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0 &&
+                    vertex.m_path_length == 2)
+                {
+                    m_shadow_catcher_data.m_direct_shaded_radiance += env_radiance;
+                    m_shadow_catcher_data.m_direct_unshaded_radiance += env_radiance;
+                }
 
                 // Update path radiance.
                 m_path_radiance.add_emission(
@@ -720,7 +726,7 @@ namespace
                                         m_shadow_catcher_data.m_direct_unshaded_radiance += emitted_radiance;
 
                                         // Apply path throughput.
-                                        //emitted_radiance *= vertex.m_throughput;
+                                        emitted_radiance *= vertex.m_throughput;
 
                                         break;
                                     }
@@ -822,7 +828,7 @@ namespace
                 vertex_radiance *= vertex.m_throughput;
 
                 // Store shadow catcher radiance
-                if (vertex.m_path_length == 1)
+                //if (vertex.m_path_length == 1)
                 {
                     unshaded_radiance *= vertex.m_throughput;
                     m_shadow_catcher_data.m_direct_unshaded_radiance += unshaded_radiance;
@@ -831,12 +837,24 @@ namespace
                     m_shadow_catcher_data.m_direct_shaded_radiance += shaded_radiance;
                 }
 
-                if (/*vertex.m_scattering_modes == ScatteringMode::Specular && */vertex.m_path_length > 1 && strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0)
+                if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0 &&
+                    (vertex.m_path_length == 1 ||
+                    (vertex.m_prev_mode == ScatteringMode::Glossy && vertex.m_path_length > 1)))
+                //if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0)
                 {
-                    //ScatteringMode::has_specular(vertex.m_scattering_modes);
+                    float unshaded_value = luminance(unshaded_radiance.to_rgb(g_std_lighting_conditions));
+                    float shaded_value = luminance(shaded_radiance.to_rgb(g_std_lighting_conditions));
 
-                    //if (vertex.m_scattering_modes == ScatteringMode::None)
-                        //;
+                    float shadow_value;
+                    if (unshaded_value == shaded_value)
+                    {
+                        shadow_value = foundation::saturate(unshaded_value);
+                    }
+                    else
+                    {
+                        shadow_value = saturate(shaded_value * safe_rcp(unshaded_value, 0.0f));
+                    }
+
                     // Evaluate the environment EDF.
                     Spectrum env_radiance(Spectrum::Illuminance);
                     float env_prob;
@@ -865,18 +883,15 @@ namespace
 
                     // Apply path throughput.
                     //env_radiance *= vertex.m_throughput;
-                    //env_radiance *= m_shadow_catcher_data.m_direct_shaded_radiance;
-                    //madd(vertex_radiance, material_value, env_radiance);
+                    //env_radiance *= shadow_value;
 
                     // Update path radiance.
-                    //m_path_radiance.add_emission(
-                    //    vertex.m_path_length,
-                    //    vertex.m_aov_mode,
-                    //    env_radiance);
+                    m_path_radiance.add_emission(
+                        vertex.m_path_length,
+                        vertex.m_aov_mode,
+                        env_radiance);
 
-                    //vertex_radiance.m_beauty = env_radiance;
-                    //vertex_radiance.m_glossy = env_radiance;
-                    vertex_radiance.set(0.0f);
+                    return;
                 }
 
                 // Optionally clamp secondary rays contribution.
