@@ -751,6 +751,13 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
         sample.m_value /= sample.get_probability();
     vertex.m_throughput *= sample.m_value.m_beauty;
 
+
+    if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0 &&
+        (vertex.m_path_length == 1))
+    {
+        return false;
+    }
+
     // Update bounce counters.
     ++vertex.m_path_length;
     m_diffuse_bounces +=  (sample.get_mode() >> ScatteringMode::DiffuseBitShift)  & 1;

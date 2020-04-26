@@ -604,12 +604,12 @@ namespace
                     clamp_contribution(env_radiance, m_params.m_max_ray_intensity);
 
                 // Only apply if it bounced off the shadow catcher
-                if (strcmp(vertex.m_parent_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0 &&
-                    vertex.m_path_length == 2)
-                {
-                    m_shadow_catcher_data.m_direct_shaded_radiance += env_radiance;
-                    m_shadow_catcher_data.m_direct_unshaded_radiance += env_radiance;
-                }
+                //if (strcmp(vertex.m_parent_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0 &&
+                //    vertex.m_path_length == 2)
+                //{
+                //    m_shadow_catcher_data.m_direct_shaded_radiance += env_radiance;
+                //    m_shadow_catcher_data.m_direct_unshaded_radiance += env_radiance;
+                //}
 
                 // Update path radiance.
                 m_path_radiance.add_emission(
@@ -660,81 +660,81 @@ namespace
                 {
                     // In case of shadow catcher we extend the ray until it hits the emitter (or the environment?)
                     // This will give us unshaded light value
-                    if (m_shadow_catcher_data.m_enabled && vertex.m_path_length > 1)
-                    {
-                        ShadingPoint current_point(*vertex.m_shading_point);
-                        while (current_point.hit_surface())
-                        {
-                            // extend the ray until it hits the emmiter or env. map.
-                            const ShadingRay& ray = current_point.get_ray();
+                    //if (m_shadow_catcher_data.m_enabled && vertex.m_path_length > 1)
+                    //{
+                    //    ShadingPoint current_point(*vertex.m_shading_point);
+                    //    while (current_point.hit_surface())
+                    //    {
+                    //        // extend the ray until it hits the emmiter or env. map.
+                    //        const ShadingRay& ray = current_point.get_ray();
 
-                            ShadingRay next_ray(
-                                current_point.get_point(),
-                                ray.m_dir,
-                                ray.m_time,
-                                ray.m_flags,
-                                ray.m_depth);
+                    //        ShadingRay next_ray(
+                    //            current_point.get_point(),
+                    //            ray.m_dir,
+                    //            ray.m_time,
+                    //            ray.m_flags,
+                    //            ray.m_depth);
 
-                            // Advance the differentials if the ray has them.
-                            if (ray.m_has_differentials)
-                            {
-                                next_ray.m_rx_org = ray.m_rx_org + ray.m_tmax * ray.m_rx_dir;
-                                next_ray.m_ry_org = ray.m_ry_org + ray.m_tmax * ray.m_ry_dir;
-                                next_ray.m_rx_dir = ray.m_rx_dir;
-                                next_ray.m_ry_dir = ray.m_ry_dir;
-                                next_ray.m_has_differentials = true;
-                            }
+                    //        // Advance the differentials if the ray has them.
+                    //        if (ray.m_has_differentials)
+                    //        {
+                    //            next_ray.m_rx_org = ray.m_rx_org + ray.m_tmax * ray.m_rx_dir;
+                    //            next_ray.m_ry_org = ray.m_ry_org + ray.m_tmax * ray.m_ry_dir;
+                    //            next_ray.m_rx_dir = ray.m_rx_dir;
+                    //            next_ray.m_ry_dir = ray.m_ry_dir;
+                    //            next_ray.m_has_differentials = true;
+                    //        }
 
-                            ShadingPoint hit_point;
-                            m_shading_context.get_intersector().trace(
-                                next_ray,
-                                hit_point,
-                                &current_point);
+                    //        ShadingPoint hit_point;
+                    //        m_shading_context.get_intersector().trace(
+                    //            next_ray,
+                    //            hit_point,
+                    //            &current_point);
 
-                            if (hit_point.hit_surface())
-                            {
-                                const Material* material = hit_point.get_material();
-                                if (material != nullptr)
-                                {
-                                    const EDF* edf = hit_point.is_curve_primitive() ? nullptr : material->get_render_data().m_edf;
-                                    if (edf != nullptr)
-                                    {
-                                        PathVertex temp_vertex(m_sampling_context);
-                                        temp_vertex.m_edf = edf;
-                                        temp_vertex.m_shading_point = &hit_point;
+                    //        if (hit_point.hit_surface())
+                    //        {
+                    //            const Material* material = hit_point.get_material();
+                    //            if (material != nullptr)
+                    //            {
+                    //                const EDF* edf = hit_point.is_curve_primitive() ? nullptr : material->get_render_data().m_edf;
+                    //                if (edf != nullptr)
+                    //                {
+                    //                    PathVertex temp_vertex(m_sampling_context);
+                    //                    temp_vertex.m_edf = edf;
+                    //                    temp_vertex.m_shading_point = &hit_point;
 
-                                        temp_vertex.m_scattering_modes = vertex.m_scattering_modes;
-                                        temp_vertex.m_throughput = vertex.m_throughput;
-                                        temp_vertex.m_prev_mode = vertex.m_prev_mode;
-                                        temp_vertex.m_prev_prob = vertex.m_prev_prob;
-                                        temp_vertex.m_aov_mode = vertex.m_aov_mode;
+                    //                    temp_vertex.m_scattering_modes = vertex.m_scattering_modes;
+                    //                    temp_vertex.m_throughput = vertex.m_throughput;
+                    //                    temp_vertex.m_prev_mode = vertex.m_prev_mode;
+                    //                    temp_vertex.m_prev_prob = vertex.m_prev_prob;
+                    //                    temp_vertex.m_aov_mode = vertex.m_aov_mode;
 
-                                        temp_vertex.m_outgoing =
-                                            next_ray.m_has_differentials
-                                            ? foundation::Dual3d(
-                                                -next_ray.m_dir,
-                                                -next_ray.m_rx_dir,
-                                                -next_ray.m_ry_dir)
-                                            : foundation::Dual3d(-next_ray.m_dir);
+                    //                    temp_vertex.m_outgoing =
+                    //                        next_ray.m_has_differentials
+                    //                        ? foundation::Dual3d(
+                    //                            -next_ray.m_dir,
+                    //                            -next_ray.m_rx_dir,
+                    //                            -next_ray.m_ry_dir)
+                    //                        : foundation::Dual3d(-next_ray.m_dir);
 
-                                        temp_vertex.m_cos_on = foundation::dot(
-                                            temp_vertex.m_outgoing.get_value(), temp_vertex.get_shading_normal());
+                    //                    temp_vertex.m_cos_on = foundation::dot(
+                    //                        temp_vertex.m_outgoing.get_value(), temp_vertex.get_shading_normal());
 
-                                        // Compute the emitted radiance.
-                                        Spectrum emitted_radiance(0.0f);
-                                        add_emitted_light_contribution(temp_vertex, emitted_radiance);
-                                        m_shadow_catcher_data.m_direct_unshaded_radiance += emitted_radiance;
+                    //                    // Compute the emitted radiance.
+                    //                    Spectrum emitted_radiance(0.0f);
+                    //                    add_emitted_light_contribution(temp_vertex, emitted_radiance);
+                    //                    m_shadow_catcher_data.m_direct_unshaded_radiance += emitted_radiance;
 
-                                        // Apply path throughput.
-                                        emitted_radiance *= vertex.m_throughput;
+                    //                    // Apply path throughput.
+                    //                    emitted_radiance *= vertex.m_throughput;
 
-                                        break;
-                                    }
-                                }
-                            }
-                            current_point = hit_point;
-                        }
-                    }
+                    //                    break;
+                    //                }
+                    //            }
+                    //        }
+                    //        current_point = hit_point;
+                    //    }
+                    //}
                     // Record light path event.
                     if (m_light_path_stream)
                         m_light_path_stream->hit_reflector(vertex);
@@ -786,7 +786,9 @@ namespace
                 // Direct lighting contribution.
                 Spectrum shaded_radiance(Spectrum::Illuminance);
                 Spectrum unshaded_radiance(Spectrum::Illuminance);
+                Spectrum unshaded_ibl_radiance(Spectrum::Illuminance);
                 unshaded_radiance.set(0.0f);
+                unshaded_ibl_radiance.set(0.0f);
                 shaded_radiance.set(0.0f);
 
                 if (m_params.m_enable_dl || vertex.m_path_length > 1)
@@ -818,7 +820,7 @@ namespace
                             vertex.m_bsdf_data,
                             vertex.m_scattering_modes,
                             vertex_radiance,
-                            unshaded_radiance,
+                            unshaded_ibl_radiance,
                             shaded_radiance,
                             m_light_path_stream);
                     }
@@ -826,10 +828,12 @@ namespace
 
                 // Apply path throughput.
                 vertex_radiance *= vertex.m_throughput;
+                unshaded_ibl_radiance *= vertex.m_throughput;
 
                 // Store shadow catcher radiance
                 //if (vertex.m_path_length == 1)
                 {
+                    unshaded_ibl_radiance *= vertex.m_throughput;
                     unshaded_radiance *= vertex.m_throughput;
                     m_shadow_catcher_data.m_direct_unshaded_radiance += unshaded_radiance;
 
@@ -838,9 +842,7 @@ namespace
                 }
 
                 if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0 &&
-                    (vertex.m_path_length == 1 ||
-                    (vertex.m_prev_mode == ScatteringMode::Glossy && vertex.m_path_length > 1)))
-                //if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0)
+                    (vertex.m_path_length == 1))
                 {
                     float unshaded_value = luminance(unshaded_radiance.to_rgb(g_std_lighting_conditions));
                     float shaded_value = luminance(shaded_radiance.to_rgb(g_std_lighting_conditions));
@@ -889,7 +891,7 @@ namespace
                     m_path_radiance.add_emission(
                         vertex.m_path_length,
                         vertex.m_aov_mode,
-                        env_radiance);
+                        unshaded_ibl_radiance);
 
                     return;
                 }
