@@ -841,52 +841,10 @@ namespace
                     m_shadow_catcher_data.m_direct_shaded_radiance += shaded_radiance;
                 }
 
+                // Apply env unshaded radiance to shadow catcher
                 if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0 &&
                     (vertex.m_path_length == 1))
                 {
-                    float unshaded_value = luminance(unshaded_radiance.to_rgb(g_std_lighting_conditions));
-                    float shaded_value = luminance(shaded_radiance.to_rgb(g_std_lighting_conditions));
-
-                    float shadow_value;
-                    if (unshaded_value == shaded_value)
-                    {
-                        shadow_value = foundation::saturate(unshaded_value);
-                    }
-                    else
-                    {
-                        shadow_value = saturate(shaded_value * safe_rcp(unshaded_value, 0.0f));
-                    }
-
-                    // Evaluate the environment EDF.
-                    Spectrum env_radiance(Spectrum::Illuminance);
-                    float env_prob;
-                    m_env_edf->evaluate(
-                        m_shading_context,
-                        -Vector3f(vertex.m_outgoing.get_value()),
-                        env_radiance,
-                        env_prob);
-
-                    // This may happen for points of the environment map with infinite components,
-                    // which are then excluded from importance sampling and thus have zero weight.
-                    if (env_prob == 0.0f)
-                        return;
-
-                    // Multiple importance sampling.
-                    if (vertex.m_prev_mode != ScatteringMode::Specular)
-                    {
-                        assert(vertex.m_prev_prob > 0.0f);
-                        const float env_sample_count = std::max(m_params.m_ibl_env_sample_count, 1.0f);
-                        const float mis_weight =
-                            mis_power2(
-                                1.0f * vertex.m_prev_prob,
-                                env_sample_count * env_prob);
-                        env_radiance *= mis_weight;
-                    }
-
-                    // Apply path throughput.
-                    //env_radiance *= vertex.m_throughput;
-                    //env_radiance *= shadow_value;
-
                     // Update path radiance.
                     m_path_radiance.add_emission(
                         vertex.m_path_length,
