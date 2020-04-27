@@ -562,6 +562,15 @@ namespace
             {
                 assert(vertex.m_prev_mode != ScatteringMode::None);
 
+                if (strcmp(vertex.m_parent_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0)
+                {
+                    m_path_radiance.add_emission(
+                        vertex.m_path_length,
+                        vertex.m_aov_mode,
+                        vertex.m_shadow_catcher_data->m_direct_unshaded_radiance);
+                    return;
+                }
+
                 // Can't look up the environment if there's no environment EDF.
                 if (m_env_edf == nullptr)
                     return;
@@ -644,11 +653,11 @@ namespace
 
                     // Second bounce that hits the light emitter adds emitted_radiance to shaded
                     // and unshaded light values of the shadow catcher
-                    if (vertex.m_path_length == 2)
-                    {
-                        m_shadow_catcher_data.m_direct_unshaded_radiance += emitted_radiance;
-                        m_shadow_catcher_data.m_direct_shaded_radiance += emitted_radiance;
-                    }
+                    //if (vertex.m_path_length == 2)
+                    //{
+                    //    m_shadow_catcher_data.m_direct_unshaded_radiance += emitted_radiance;
+                    //    m_shadow_catcher_data.m_direct_shaded_radiance += emitted_radiance;
+                    //}
 
                     // Update path radiance.
                     m_path_radiance.add_emission(
@@ -828,27 +837,28 @@ namespace
 
                 // Apply path throughput.
                 vertex_radiance *= vertex.m_throughput;
-                unshaded_ibl_radiance *= vertex.m_throughput;
+
+                vertex.m_shadow_catcher_data = &m_shadow_catcher_data;
 
                 // Store shadow catcher radiance
                 //if (vertex.m_path_length == 1)
+                if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0)
                 {
                     unshaded_ibl_radiance *= vertex.m_throughput;
                     unshaded_radiance *= vertex.m_throughput;
-                    m_shadow_catcher_data.m_direct_unshaded_radiance += unshaded_radiance;
+                    m_shadow_catcher_data.m_direct_unshaded_radiance = unshaded_ibl_radiance;
 
                     shaded_radiance *= vertex.m_throughput;
                     m_shadow_catcher_data.m_direct_shaded_radiance += shaded_radiance;
                 }
 
                 // Apply env unshaded radiance to shadow catcher
-                if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0 &&
-                    (vertex.m_path_length == 1))
+                if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0)
                 {
                     // Update path radiance.
-                    m_path_radiance.add_emission(
+                    m_path_radiance.add_shadowcatcher(
                         vertex.m_path_length,
-                        vertex.m_aov_mode,
+                        vertex.m_aov_mode,   //ScatteringMode::Mode::Glossy, //vertex.m_aov_mode,
                         unshaded_ibl_radiance);
 
                     return;

@@ -311,6 +311,14 @@ size_t PathTracer<PathVisitor, VolumeVisitor, Adjoint>::trace(
             break;
         }
 
+        if (vertex.m_path_length > 1 &&
+            ScatteringMode::has_glossy_or_specular(vertex.m_aov_mode) &&
+            strcmp(vertex.m_parent_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0)
+        {
+            m_path_visitor.on_miss(vertex);
+            break;
+        }
+
         // Retrieve the material at the shading point.
         const Material* material = vertex.get_material();
 
@@ -746,17 +754,23 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
     if (vertex.m_path_length == 1)
         vertex.m_aov_mode = sample.get_mode();
 
+    if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0)
+    {
+        // If first hit is the shadow catcher just stop tracing
+        if (vertex.m_path_length == 1)
+            return false;
+
+        // If not firt bounce then replace glossy and specular by shadowcatcher values
+        //if (ScatteringMode::has_glossy_or_specular(vertex.m_aov_mode))
+        //{
+        //    sample.m_value.m_beauty = vertex.m_shadow_catcher_data->m_direct_unshaded_radiance;
+        //}
+    }
+
     // Update path throughput.
     if (sample.get_probability() != BSDF::DiracDelta)
         sample.m_value /= sample.get_probability();
     vertex.m_throughput *= sample.m_value.m_beauty;
-
-
-    if (strcmp(vertex.m_shading_point->get_object_instance().get_name(), "Box001_sc_inst") == 0 &&
-        (vertex.m_path_length == 1))
-    {
-        return false;
-    }
 
     // Update bounce counters.
     ++vertex.m_path_length;
