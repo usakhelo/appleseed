@@ -49,6 +49,7 @@ class ShadowCatcher
   public:
       ShadowCatcher()
         : m_enabled(false)
+        , m_shadow_ratio(0.0f)
       {
           m_direct_unshaded_radiance.set(0.0f);
           m_direct_shaded_radiance.set(0.0f);
@@ -56,6 +57,7 @@ class ShadowCatcher
 
     Spectrum                m_direct_unshaded_radiance;
     Spectrum                m_direct_shaded_radiance;
+    float                   m_shadow_ratio;
 
     bool                    m_enabled;
 };

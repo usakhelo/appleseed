@@ -760,11 +760,6 @@ bool PathTracer<PathVisitor, VolumeVisitor, Adjoint>::process_bounce(
         if (vertex.m_path_length == 1)
             return false;
 
-        // If not firt bounce then replace glossy and specular by shadowcatcher values
-        //if (ScatteringMode::has_glossy_or_specular(vertex.m_aov_mode))
-        //{
-        //    sample.m_value.m_beauty = vertex.m_shadow_catcher_data->m_direct_unshaded_radiance;
-        //}
     }
 
     // Update path throughput.

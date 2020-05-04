@@ -422,10 +422,6 @@ void DirectLightingIntegrator::add_emitting_shape_sample_contribution(
         sample.m_point,
         transmission);
 
-    // Discard occluded samples.
-    if (is_zero(transmission))
-        return;
-
     // Evaluate the BSDF (or volume).
     DirectShadingComponents material_value;
     const float material_probability =
@@ -435,8 +431,6 @@ void DirectLightingIntegrator::add_emitting_shape_sample_contribution(
             m_light_sampling_modes,
             material_value);
     assert(material_probability >= 0.0f);
-    if (material_probability == 0.0f)
-        return;
 
     // Build a shading point on the light source.
     ShadingPoint light_shading_point;
@@ -471,7 +465,14 @@ void DirectLightingIntegrator::add_emitting_shape_sample_contribution(
             m_light_sample_count * sample.m_probability,
             m_material_sample_count * material_probability * g);
 
-    unshaded_radiance += edf_value * ((mis_weight * g) / (sample.m_probability * contribution_prob));
+    unshaded_radiance += edf_value; // *((mis_weight * g) / (sample.m_probability * contribution_prob));
+
+    // Discard occluded samples.
+    if (is_zero(transmission))
+        return;
+
+    if (material_probability == 0.0f)
+        return;
 
     // Add the contribution of this sample to the illumination.
     edf_value *= transmission;
@@ -563,8 +564,8 @@ void DirectLightingIntegrator::add_non_physical_light_sample_contribution(
         return;
 
     light_value *= transmission;
-    shaded_radiance += light_value * attenuation;
     light_value *= attenuation / (sample.m_probability * probability);
+    shaded_radiance += light_value;
     madd(radiance, material_value, light_value);
 
     // Record light path event.

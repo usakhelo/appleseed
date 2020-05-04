@@ -224,43 +224,7 @@ bool ShadingEngine::shade_hit_point(
         // alpha = 1.0f - shadow_value
         if (strcmp(shading_point.get_object_instance().get_name(), "Box001_sc_inst") == 0)
         {
-            float unshaded_value = luminance(shadow_catcher_data.m_direct_unshaded_radiance.to_rgb(g_std_lighting_conditions));
-            float shaded_value = luminance(shadow_catcher_data.m_direct_shaded_radiance.to_rgb(g_std_lighting_conditions));
-
-            // Evaluate environment to replace shadow catcher shader pixels
-
-            //// Retrieve the environment shader of the scene.
-            //const EnvironmentShader* environment_shader =
-            //    shading_point.get_scene().get_environment()->get_environment_shader();
-
-            //if (environment_shader != nullptr)
-            //{
-            //    // There is an environment shader: execute it.
-            //    ShadingComponents env_shading_components;
-            //    AOVComponents env_aov_components;
-            //    environment_shader->evaluate(
-            //        shading_context,
-            //        pixel_context,
-            //        normalize(shading_point.get_ray().m_dir),
-            //        shading_result,
-            //        env_shading_components,
-            //        env_aov_components);
-            //}
-
-            float shadow_value;
-            if (unshaded_value == shaded_value)
-            {
-                shadow_value = saturate(unshaded_value);
-            }
-            else
-            {
-                shadow_value = saturate(shaded_value * safe_rcp(unshaded_value, 0.0f));
-            }
-
-            //shading_result.m_main.a = 1.0f - shadow_value;
-            //shading_result.m_main.r *= shadow_value;
-            //shading_result.m_main.g *= shadow_value;
-            //shading_result.m_main.b *= shadow_value;
+            shading_result.m_main.a = 1.0f - shadow_catcher_data.m_shadow_ratio;
 
             return true;
         }
